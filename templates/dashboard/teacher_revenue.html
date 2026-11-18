@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block title %}My Revenue · Teacher{% endblock %}
+{% block content %}
+
+<!-- Header -->
+<div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+  <div>
+    <a href="{% url 'dashboard' %}" style="color: var(--g500); text-decoration: none; font-size: 14px;">
+      <i class="bi bi-arrow-left"></i> Back to Dashboard
+    </a>
+    <h2 style="margin: 8px 0 4px; font-size: 32px; font-weight: 800; color: var(--g900);">💰 My Revenue</h2>
+    <p style="color: var(--g500); font-size: 15px; margin: 0;">
+      Earnings from all your courses. Teacher share is per-course — adjust in Django admin if a course needs a different split.
+    </p>
+  </div>
+  <a href="{% url 'download_payout_statement' %}"
+     class="btn"
+     style="background: #DC2626; color: white; padding: 10px 20px;
+            border-radius: 8px; text-decoration: none; font-weight: 700;
+            display: inline-flex; align-items: center; gap: 8px;
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
+    <i class="bi bi-file-earmark-pdf-fill"></i>
+    Download Statement
+  </a>
+</div>
+
+<!-- Summary cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+  <div class="card" style="padding: 24px; border-left: 4px solid #5B21B6;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Lifetime Earnings</div>
+    <h2 style="font-size: 30px; font-weight: 800; color: var(--g900); margin: 6px 0 4px;">₹{{ summary.lifetime_teacher }}</h2>
+    <div style="font-size: 12px; color: var(--g500);">Gross sales: ₹{{ summary.lifetime_gross }}</div>
+  </div>
+  <div class="card" style="padding: 24px; border-left: 4px solid #16A34A;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">This Month</div>
+    <h2 style="font-size: 30px; font-weight: 800; color: #16A34A; margin: 6px 0 4px;">₹{{ summary.month_teacher }}</h2>
+    <div style="font-size: 12px; color: var(--g500);">Gross sales: ₹{{ summary.month_gross }}</div>
+  </div>
+  <div class="card" style="padding: 24px; border-left: 4px solid #F59E0B;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">This Year</div>
+    <h2 style="font-size: 30px; font-weight: 800; color: #0F172A; margin: 6px 0 4px;">₹{{ summary.year_teacher }}</h2>
+    <div style="font-size: 12px; color: var(--g500);">Gross sales: ₹{{ summary.year_gross }}</div>
+  </div>
+  <div class="card" style="padding: 24px; border-left: 4px solid #64748B;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Platform Fee (Lifetime)</div>
+    <h2 style="font-size: 30px; font-weight: 800; color: var(--g900); margin: 6px 0 4px;">₹{{ summary.lifetime_platform }}</h2>
+    <div style="font-size: 12px; color: var(--g500);">Kept by EduPath</div>
+  </div>
+</div>
+
+<!-- Monthly chart -->
+<div class="card" style="padding: 24px; border-radius: 16px; margin-bottom: 32px;">
+  <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">📊 Monthly Earnings (last 12 months)</h4>
+  <div style="position: relative; height: 300px; width: 100%;">
+    <canvas id="revenueChart"></canvas>
+  </div>
+</div>
+
+<!-- Per-course breakdown -->
+<h3 style="font-size: 22px; font-weight: 800; color: var(--g900); margin-bottom: 16px;">📚 Per-Course Breakdown</h3>
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--g100); margin-bottom: 40px;">
+  <table class="table" style="margin: 0; width: 100%; text-align: left;">
+    <thead>
+      <tr style="background: #F8FAFC; border-bottom: 1px solid var(--g100);">
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Course</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Share %</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Paid Enrollments</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Gross</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Your Share</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Platform</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in course_rows %}
+      <tr style="border-bottom: 1px solid var(--g100);">
+        <td style="padding: 14px 20px; font-weight: 600; color: var(--g900);">{{ r.course.title }}</td>
+        <td style="padding: 14px 20px;">
+          <span class="badge" style="background: #EDE9FE; color: #5B21B6; font-weight: 700;">{{ r.share_percent }}%</span>
+        </td>
+        <td style="padding: 14px 20px; color: var(--g700);">{{ r.enrollments }}</td>
+        <td style="padding: 14px 20px; color: var(--g700);">₹{{ r.gross }}</td>
+        <td style="padding: 14px 20px; font-weight: 700; color: #16A34A;">₹{{ r.teacher_earn }}</td>
+        <td style="padding: 14px 20px; color: var(--g500);">₹{{ r.platform_earn }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" style="text-align: center; color: var(--g500); padding: 40px;">
+          No paid enrollments yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Recent transactions -->
+<h3 style="font-size: 22px; font-weight: 800; color: var(--g900); margin-bottom: 16px;">🧾 Recent Transactions</h3>
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--g100);">
+  <table class="table" style="margin: 0; width: 100%; text-align: left;">
+    <thead>
+      <tr style="background: #F8FAFC; border-bottom: 1px solid var(--g100);">
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Date</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Student</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Course</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Paid</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Your Share</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in recent_rows %}
+      <tr style="border-bottom: 1px solid var(--g100);">
+        <td style="padding: 14px 20px; color: var(--g500); font-size: 13px;">
+          {{ r.payment.created_at|date:"d M Y" }}
+        </td>
+        <td style="padding: 14px 20px; font-weight: 600; color: var(--g900);">
+          {{ r.payment.student.user.get_full_name|default:r.payment.student.user.username }}
+        </td>
+        <td style="padding: 14px 20px; color: var(--g700);">{{ r.payment.course.title }}</td>
+        <td style="padding: 14px 20px; color: var(--g700);">₹{{ r.payment.amount }}</td>
+        <td style="padding: 14px 20px; font-weight: 700; color: #16A34A;">₹{{ r.teacher_earn }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" style="text-align: center; color: var(--g500); padding: 40px;">
+          No transactions yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
+    const canvas = document.getElementById('revenueChart');
+    if (!canvas) return;
+
+    new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels: {{ monthly_labels_json|safe }},
+        datasets: [
+          {
+            label: 'Your Earnings (₹)',
+            data: {{ monthly_teacher_json|safe }},
+            backgroundColor: '#5B21B6',
+            borderRadius: 6,
+          },
+          {
+            label: 'Gross Sales (₹)',
+            data: {{ monthly_gross_json|safe }},
+            backgroundColor: 'rgba(91, 33, 182, 0.2)',
+            borderRadius: 6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { padding: 16, font: { family: 'Inter' } } },
+          tooltip: {
+            callbacks: {
+              label: function(ctx) { return ctx.dataset.label + ': ₹' + ctx.parsed.y.toFixed(2); }
+            }
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { callback: function(v) { return '₹' + v; } }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}

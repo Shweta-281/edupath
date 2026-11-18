@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Compose Message{% endblock %}
+{% block content %}
+
+<div style="max-width: 600px; margin: 0 auto;">
+  <div class="page-header" style="margin-bottom: 24px;">
+    <h2 class="page-title">✍️ Compose Message</h2>
+  </div>
+
+  <div class="card" style="padding: 32px; background: white; border: 1px solid var(--border-color); border-radius: 12px;">
+    <form method="POST">
+      {% csrf_token %}
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">To</label>
+        {{ form.recipient }}
+      </div>
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Subject</label>
+        {{ form.subject }}
+      </div>
+      <div style="margin-bottom: 24px;">
+        <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Message</label>
+        {{ form.body }}
+      </div>
+      <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--brand-primary); color: white; border: none; font-weight: 600; cursor: pointer;">
+        Send Message
+      </button>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

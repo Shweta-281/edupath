@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Manage Assignments{% endblock %}
+{% block content %}
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+  <div>
+    <h2 class="page-title">📁 Manage Assignments</h2>
+    <p class="page-subtitle">Create, track, and grade student assignments.</p>
+  </div>
+  <a href="{% url 'teacher_create_assignment' %}" class="btn btn-primary" style="background: var(--brand-primary); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+    <i class="bi bi-plus-lg"></i> Create Assignment
+  </a>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+  {% for assignment in assignments %}
+  <div class="card" style="padding: 24px; background: white; border: 1px solid var(--border-color); border-radius: 12px; display: flex; flex-direction: column;">
+    <div style="flex: 1;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+        <h4 style="color: var(--text-main); font-size: 18px; margin: 0; font-weight: 700;">{{ assignment.title }}</h4>
+        <span class="badge" style="background: var(--brand-primary-light); color: var(--brand-primary); padding: 6px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; white-space: nowrap;">
+          {{ assignment.submissions.count }} Turned In
+        </span>
+      </div>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">{{ assignment.course.title }}</p>
+      
+      <div style="font-size: 13px; margin-bottom: 20px;">
+        <span style="color: {% if assignment.due_date|date:'U' < now|date:'U' %}#DC2626{% else %}var(--text-main){% endif %}; font-weight: 600;">
+          <i class="bi bi-clock"></i> Due: {{ assignment.due_date|date:"d M Y, h:i A" }}
+        </span>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 16px;">
+      {% if assignment.attachment %}
+        <a href="{{ assignment.attachment.url }}" target="_blank" style="color: var(--text-muted); font-size: 13px; text-decoration: none;"><i class="bi bi-paperclip"></i> Attachment</a>
+      {% else %}
+        <span></span>
+      {% endif %}
+      <a href="{% url 'teacher_assignment_detail' assignment.pk %}" style="background: var(--bg-hover); color: var(--brand-primary); padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; transition: 0.2s;" onmouseover="this.style.background='var(--brand-primary-light)'" onmouseout="this.style.background='var(--bg-hover)'">
+        View Submissions
+      </a>
+    </div>
+  </div>
+  {% empty %}
+  <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: white; border-radius: 12px; border: 1px dashed var(--border-color);">
+    <div style="font-size: 40px; margin-bottom: 16px;">📂</div>
+    <h4 style="color: var(--text-main); margin-bottom: 8px;">No assignments yet</h4>
+    <p style="color: var(--text-muted);">Click "Create Assignment" to get started.</p>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

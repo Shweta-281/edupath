@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ course.title }} Discussions{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h2 class="page-title">💬 {{ course.title }} Q&A</h2>
+  <p class="page-subtitle">Ask questions, share ideas, and help your classmates.</p>
+</div>
+
+<div style="display: flex; gap: 24px; align-items: flex-start;">
+  
+  <!-- Left: Discussion List -->
+  <div style="flex: 2; display: flex; flex-direction: column; gap: 16px;">
+    {% for d in discussions %}
+    <a href="{% url 'discussion_detail' d.id %}" style="text-decoration: none;">
+      <div class="card" style="padding: 20px; border-radius: 12px; transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h4 style="margin: 0; font-size: 18px; color: var(--brand-primary); font-weight: 700;">{{ d.title }}</h4>
+          {% if d.is_resolved %}<span class="badge badge-green">Resolved</span>{% endif %}
+        </div>
+        <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 12px;">{{ d.content|truncatewords:20 }}</p>
+        <div style="font-size: 12px; color: var(--text-muted); display: flex; gap: 16px;">
+          <span><i class="bi bi-person-circle"></i> {{ d.author.username }}</span>
+          <span><i class="bi bi-clock"></i> {{ d.created_at|timesince }} ago</span>
+          <span><i class="bi bi-chat-dots"></i> {{ d.replies.count }} Replies</span>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+    <div style="text-align: center; padding: 40px; border: 1px dashed var(--border-color); border-radius: 12px;">
+      <p style="color: var(--text-muted);">No discussions yet. Be the first to ask a question!</p>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Right: Ask Question Form -->
+  <div style="flex: 1;">
+    <div class="card" style="padding: 24px; border-radius: 12px; position: sticky; top: 100px;">
+      <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Ask a Question</h4>
+      <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Question Title" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 12px;">
+        <textarea name="content" placeholder="Explain your question in detail..." rows="4" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px;"></textarea>
+        <button type="submit" style="width: 100%; background: var(--brand-primary); color: white; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Post Question</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

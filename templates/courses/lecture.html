@@ -1,13 +1,66 @@
 {% extends "base.html" %}
+{% block title %}{{ lecture.title }}{% endblock %}
 {% block content %}
-<h2>{{ lecture.title }}</h2>
-<p style="color:var(--g500);margin-bottom:24px;">{{ lecture.chapter.course.title }} · {{ lecture.chapter.title }}</p>
-{% if lecture.video_url %}
-  <div style="position:relative;padding-bottom:56.25%;height:0;border-radius:16px;overflow:hidden;margin-bottom:20px;">
-    <iframe src="{{ lecture.video_url }}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;" allowfullscreen></iframe>
+
+<div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+  
+  <!-- LEFT: Video Player & Info -->
+  <div style="flex: 2; min-width: 300px;">
+    
+    <!-- Fake Video Player (Replace src with your actual video URL) -->
+    <div style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+      <!-- If you have a real video URL, use an iframe or video tag here. For now, a placeholder: -->
+      <iframe width="100%" height="100%" src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=0" title="Lecture Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+      <div>
+        <h3 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 800;">{{ lecture.title }}</h3>
+        <p style="color: var(--text-muted); margin: 0; font-size: 14px;">
+          {{ lecture.chapter.title }} · {{ lecture.duration_minutes }} mins
+        </p>
+      </div>
+      
+      <!-- Complete Button -->
+      <div>
+        {% if is_completed %}
+          <span class="badge badge-green" style="padding: 10px 20px; font-size: 14px;">✅ Completed</span>
+        {% else %}
+          <a href="{% url 'mark_lecture_complete' lecture.pk %}" class="btn btn-primary" style="padding: 12px 24px; font-weight: 700; border-radius: 8px; font-size: 15px;">
+            Mark as Complete
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
   </div>
-{% endif %}
-{% if lecture.pdf %}
-  <a href="{{ lecture.pdf.url }}" class="btn btn-outline" download>📄 Download PDF</a>
-{% endif %}
+
+  <!-- RIGHT: Course Sidebar -->
+  <div style="flex: 1; min-width: 300px; background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 0; overflow: hidden;">
+    <div style="padding: 20px; border-bottom: 1px solid var(--border-color); background: #F8FAFC;">
+      <h4 style="margin: 0; font-weight: 700; font-size: 16px;">Course Content</h4>
+    </div>
+    
+    <div style="max-height: 600px; overflow-y: auto;">
+      {% for lec in all_lectures %}
+        <!-- Check if this is the current lecture -->
+        <a href="{% url 'lecture_view' lec.pk %}" style="display: flex; align-items: center; gap: 12px; padding: 16px 20px; text-decoration: none; border-bottom: 1px solid var(--border-color); transition: 0.2s; {% if lec.id == lecture.id %}background: var(--brand-primary-light); border-left: 4px solid var(--brand-primary);{% else %}background: white;{% endif %}">
+          
+          <i class="bi {% if lec.id == lecture.id %}bi-play-circle-fill{% else %}bi-play-circle{% endif %}" style="font-size: 20px; color: var(--brand-primary);"></i>
+          
+          <div style="flex: 1;">
+            <div style="font-size: 14px; font-weight: {% if lec.id == lecture.id %}700{% else %}500{% endif %}; color: {% if lec.id == lecture.id %}var(--brand-primary){% else %}var(--text-main){% endif %};">
+              {{ lec.title }}
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted);">{{ lec.chapter.title }}</div>
+          </div>
+          
+          <span style="font-size: 12px; color: var(--text-muted);">{{ lec.duration_minutes }}m</span>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+
 {% endblock %}

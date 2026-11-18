@@ -4,10 +4,51 @@
 <div class="grid-3">
   {% for c in classes %}
     <div class="card card-hover">
-      <h4>{{ c.title }}</h4>
-      <p style="color:var(--g500);font-size:13px;margin-bottom:14px;">{{ c.course.title }} · {{ c.scheduled_at|date:"d M Y, H:i" }}</p>
-      <a href="{% url 'join_class' c.pk %}" class="btn btn-danger btn-sm btn-block">🔴 Join Live</a>
+      <h4 style="display: flex; justify-content: space-between; align-items: center;">
+        <span>{{ c.title }}</span>
+        {% if c.is_live_now %}
+          <span style="font-size: 11px; font-weight: 700; color: #DC2626; background: #FEE2E2;
+                       padding: 3px 8px; border-radius: 999px; display: inline-flex;
+                       align-items: center; gap: 4px;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #DC2626;"></span> LIVE
+          </span>
+        {% endif %}
+      </h4>
+      <p style="color:var(--g500);font-size:13px;margin-bottom:14px;">
+        {{ c.course.title }} · {{ c.scheduled_at|date:"d M Y, H:i" }}
+      </p>
+
+      {% if user.role == 'teacher' and c.teacher == user %}
+        <!-- Teacher view: join + attendance report -->
+        <div style="display: flex; gap: 8px;">
+          <a href="{% url 'join_class' c.pk %}"
+             class="btn btn-danger btn-sm"
+             style="flex: 1; text-align: center;">🔴 Start Class</a>
+          <a href="{% url 'live_class_attendance_report' c.pk %}"
+             class="btn btn-sm"
+             style="background: #F1F5F9; color: var(--g900); font-weight: 600;
+                    text-decoration: none; padding: 8px 14px; border-radius: 6px;">
+            📊 Attendance
+          </a>
+        </div>
+
+      {% elif user.role == 'admin' %}
+        <!-- Admin can see attendance but not join as teacher -->
+        <a href="{% url 'live_class_attendance_report' c.pk %}"
+           class="btn btn-sm btn-block"
+           style="background: #F1F5F9; color: var(--g900); font-weight: 600;
+                  text-decoration: none; padding: 8px 14px; border-radius: 6px;
+                  display: block; text-align: center;">
+          📊 View Attendance
+        </a>
+
+      {% else %}
+        <!-- Student: normal join -->
+        <a href="{% url 'join_class' c.pk %}" class="btn btn-danger btn-sm btn-block">🔴 Join Live</a>
+      {% endif %}
     </div>
-  {% empty %}<p style="color:var(--g500);">No scheduled classes.</p>{% endfor %}
+  {% empty %}
+    <p style="color:var(--g500);">No scheduled classes.</p>
+  {% endfor %}
 </div>
 {% endblock %}

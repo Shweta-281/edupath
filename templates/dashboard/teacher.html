@@ -1,100 +1,176 @@
 {% extends "base.html" %}
+{% block title %}Teacher Dashboard{% endblock %}
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
-    <div>
-        <h2>👨‍🏫 Teacher Dashboard</h2>
-        <p style="color: var(--g500);">Manage your courses and students.</p>
-    </div>
-    <div style="display: flex; gap: 12px;">
-        <a href="{% url 'create_meeting' %}" class="btn btn-outline">📅 Schedule Meeting</a>
-        <a href="{% url 'teacher_create_quiz' %}" class="btn btn-primary">+ Create Quiz</a>
-    </div>
+
+<!-- ========== WELCOME HEADER ========== -->
+<div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap;">
+  <div>
+    <h2 style="margin-bottom: 8px; font-size: 32px; font-weight: 800; color: var(--g900);">👨‍🏫 Teacher Command Center</h2>
+    <p style="color: var(--g500); font-size: 16px;">Welcome back, {{ user.get_full_name|default:user.username }}. Here is your class overview.</p>
+  </div>
+
+  <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    <!-- NEW: Revenue page -->
+    <a href="{% url 'teacher_revenue_detail' %}"
+       class="btn"
+       style="background: #5B21B6; color: white; padding: 10px 20px;
+              border-radius: 8px; text-decoration: none; font-weight: 700;
+              display: inline-flex; align-items: center; gap: 8px;
+              box-shadow: 0 4px 12px rgba(91, 33, 182, 0.2);">
+      <i class="bi bi-cash-stack"></i>
+      Revenue
+    </a>
+
+    <a href="{% url 'download_class_report' %}"
+       class="btn"
+       style="background: #DC2626; color: white; padding: 10px 20px;
+              border-radius: 8px; text-decoration: none; font-weight: 700;
+              display: inline-flex; align-items: center; gap: 8px;
+              box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
+      <i class="bi bi-file-earmark-pdf-fill"></i>
+      Download Class Report
+    </a>
+
+    <a href="{% url 'teacher_create_assignment' %}" class="btn btn-primary" style="padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+      <i class="bi bi-plus-lg"></i> New Assignment
+    </a>
+  </div>
 </div>
 
-<h4 style="margin-bottom:16px;">My Courses</h4>
-<div class="grid-3" style="margin-bottom:40px;">
-  {% for c in courses %}
-    <!-- Inside the My Courses loop -->
-<div class="card card-hover">
-  <h4>{{ c.title }}</h4>
-  <p style="color:var(--g500);font-size:13px;margin-bottom:14px;">{{ c.enrollments.count }} students</p>
+<!-- ========== STAT CARDS ========== -->
+<div class="grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; margin-bottom: 32px;">
   
-  <a href="{% url 'mark_attendance' c.pk %}" class="btn btn-primary btn-sm btn-block mb-2">Mark Attendance</a>
-  <!-- NEW BUTTON -->
-  <a href="{% url 'send_teacher_notification' c.pk %}" class="btn btn-warning btn-sm btn-block mb-2">Send Notification</a>
+  <div class="card" style="padding: 24px; border-left: 4px solid #2563EB;">
+    <div style="font-size: 13px; font-weight: 600; color: var(--g500); text-transform: uppercase; margin-bottom: 8px;">Total Students</div>
+    <h2 style="font-size: 32px; font-weight: 800; color: var(--g900); margin: 0;">{{ total_students }}</h2>
+  </div>
+
+  <div class="card" style="padding: 24px; border-left: 4px solid #5B21B6;">
+    <div style="font-size: 13px; font-weight: 600; color: var(--g500); text-transform: uppercase; margin-bottom: 8px;">Assignments Created</div>
+    <h2 style="font-size: 32px; font-weight: 800; color: var(--g900); margin: 0;">{{ total_assignments }}</h2>
+  </div>
+
+  <div class="card" style="padding: 24px; border-left: 4px solid #DC2626;">
+    <div style="font-size: 13px; font-weight: 600; color: var(--g500); text-transform: uppercase; margin-bottom: 8px;">Pending Grading</div>
+    <h2 style="font-size: 32px; font-weight: 800; color: {% if pending_grading > 0 %}#DC2626{% else %}#16A34A{% endif %}; margin: 0;">
+      {{ pending_grading }}
+    </h2>
+  </div>
+
+  <div class="card" style="padding: 24px; border-left: 4px solid #F59E0B;">
+    <div style="font-size: 13px; font-weight: 600; color: var(--g500); text-transform: uppercase; margin-bottom: 8px;">Avg Quiz Score</div>
+    <h2 style="font-size: 32px; font-weight: 800; color: var(--g900); margin: 0;">{{ avg_quiz_score }}%</h2>
+  </div>
+
+  <!-- NEW: Earnings card -->
+  <div class="card" style="padding: 24px; border-left: 4px solid #16A34A;">
+    <div style="font-size: 13px; font-weight: 600; color: var(--g500); text-transform: uppercase; margin-bottom: 8px;">💰 This Month</div>
+    <h2 style="font-size: 32px; font-weight: 800; color: #16A34A; margin: 0;">₹{{ month_teacher_earnings }}</h2>
+    <div style="font-size: 12px; color: var(--g500); margin-top: 4px;">
+      Lifetime: ₹{{ lifetime_teacher_earnings }}
+    </div>
+  </div>
+</div>
+
+<!-- ========== CHARTS ROW ========== -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin-bottom: 48px;">
   
-  <a href="{% url 'course_detail' c.pk %}" class="btn btn-outline btn-sm btn-block">View Course</a>
-</div>
-  {% empty %}
-    <p style="color:var(--g500);">No courses assigned yet.</p>
-  {% endfor %}
-</div>
+  <div class="card" style="padding: 24px; border-radius: 16px;">
+    <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">📝 Grading Progress</h4>
+    <div style="position: relative; height: 250px; width: 100%; display: flex; justify-content: center;">
+      <canvas id="gradingChart"></canvas>
+    </div>
+  </div>
 
-<!-- ========== MEETING REQUESTS ========== -->
-<h4 style="margin: 40px 0 20px; font-size: 22px;">Parent Meeting Requests</h4>
-
-<div class="grid-2">
-  {% for meeting in meetings %}
-    <div class="card" style="padding: 24px; border-left: 4px solid {% if meeting.status == 'pending' %}#F59E0B{% elif meeting.status == 'approved' %}#16A34A{% else %}#DC2626{% endif %};">
-      
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+  <div class="card" style="padding: 24px; border-radius: 16px; display: flex; flex-direction: column;">
+    <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">📚 My Active Courses</h4>
+    <div style="display: flex; flex-direction: column; gap: 12px; flex: 1; overflow-y: auto; max-height: 250px;">
+      {% for course in courses %}
+      <div style="padding: 12px 16px; background: var(--g50); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <h5 style="font-size: 18px; margin-bottom: 4px;">{{ meeting.parent.get_full_name|default:meeting.parent.username }}</h5>
-          <p style="color: var(--g500); font-size: 13px;">Requested for: <strong>{{ meeting.subject }}</strong></p>
+          <div style="font-weight: 600; color: var(--g900); font-size: 14px;">{{ course.title }}</div>
+          <div style="font-size: 12px; color: var(--g500);">Class {{ course.subject.grade }} · {{ course.subject.name }}</div>
         </div>
-        <span class="badge {% if meeting.status == 'pending' %}badge-amber{% elif meeting.status == 'approved' %}badge-green{% else %}badge-red{% endif %}">
-          {{ meeting.get_status_display }}
-        </span>
+        <a href="{% url 'teacher_manage_course' course.pk %}" style="font-size: 12px; color: var(--p700); font-weight: 600; text-decoration: none;">Manage →</a>
       </div>
-      
-      <div style="background: var(--bg); padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; gap: 24px;">
-        <div style="font-size: 14px; color: var(--g700);">
-          <i class="bi bi-calendar-event" style="color: var(--p700);"></i> {{ meeting.date }}
-        </div>
-        <div style="font-size: 14px; color: var(--g700);">
-          <i class="bi bi-clock" style="color: var(--p700);"></i> {{ meeting.time }}
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div style="display: flex; gap: 12px;">
-        {% if meeting.status == 'pending' %}
-          <a href="{% url 'update_meeting_status' meeting.id 'approved' %}" class="btn btn-success btn-sm" style="flex: 1;">✅ Accept</a>
-          <a href="{% url 'update_meeting_status' meeting.id 'rejected' %}" class="btn btn-danger btn-sm" style="flex: 1;">❌ Reject</a>
-        {% elif meeting.status == 'approved' %}
-          <a href="https://meet.jit.si/EduPath-PTM-{{ meeting.id }}" target="_blank" class="btn btn-primary btn-block">
-            <i class="bi bi-camera-video"></i> Join Video Call
-          </a>
-        {% else %}
-          <p style="color: var(--red); font-size: 13px; font-weight: 600; width: 100%; text-align: center;">Meeting Declined</p>
-        {% endif %}
-      </div>
-
+      {% empty %}
+      <p style="color: var(--g500); text-align: center;">No courses assigned yet.</p>
+      {% endfor %}
     </div>
-  {% empty %}
-    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
-      <p style="color: var(--g500);">No meeting requests yet.</p>
-    </div>
-  {% endfor %}
+  </div>
 </div>
 
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-  <h4>My Quizzes</h4>
-  <a href="{% url 'teacher_quiz_list' %}" style="color:var(--p700);font-size:14px;text-decoration:none;font-weight:600;">View All →</a>
+<!-- ========== PARENT MEETING REQUESTS ========== -->
+<h3 style="font-size: 24px; font-weight: 800; color: var(--g900); margin-bottom: 20px;">👨‍👩‍👧 Parent Meeting Requests</h3>
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--g100); margin-bottom: 40px;">
+  <table class="table" style="box-shadow: none; margin: 0; width: 100%; text-align: left;">
+    <thead>
+      <tr style="background: #F8FAFC; border-bottom: 1px solid var(--g100);">
+        <th style="padding: 16px 24px; color: var(--g500); font-weight: 600; font-size: 13px; text-transform: uppercase;">Parent Name</th>
+        <th style="padding: 16px 24px; color: var(--g500); font-weight: 600; font-size: 13px; text-transform: uppercase;">Subject</th>
+        <th style="padding: 16px 24px; color: var(--g500); font-weight: 600; font-size: 13px; text-transform: uppercase;">Status</th>
+        <th style="padding: 16px 24px; color: var(--g500); font-weight: 600; font-size: 13px; text-transform: uppercase;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in meetings %}
+      <tr style="border-bottom: 1px solid var(--g100);">
+        <td style="padding: 16px 24px;"><strong style="color: var(--g900);">{{ m.parent.username }}</strong></td>
+        <td style="padding: 16px 24px; color: var(--g500); font-size: 14px;">{{ m.subject }}</td>
+        <td style="padding: 16px 24px;">
+          <span class="badge {% if m.status == 'approved' %}badge-green{% elif m.status == 'rejected' %}badge-red{% else %}badge-amber{% endif %}">
+            {{ m.status|title }}
+          </span>
+        </td>
+        <td style="padding: 16px 24px;">
+          {% if m.status == 'pending' %}
+            <a href="{% url 'update_meeting_status' m.id 'approved' %}" class="btn btn-sm" style="background: #dcfce7; color: #166534; font-weight: 600; margin-right: 4px;">Approve</a>
+            <a href="{% url 'update_meeting_status' m.id 'rejected' %}" class="btn btn-sm" style="background: #fee2e2; color: #991b1b; font-weight: 600;">Reject</a>
+          {% else %}
+            <span style="color: var(--g500); font-size: 13px;">No actions needed</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" style="text-align: center; color: var(--g500); padding: 40px;">No meeting requests yet.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-<div class="grid-3">
-  {% for c in courses %}
-    {% for quiz in c.quizzes.all|slice:":2" %}
-      <div class="card card-hover">
-        <h4>{{ quiz.title }}</h4>
-        <p style="color:var(--g500);font-size:13px;margin-bottom:14px;">
-          {{ quiz.questions.count }} questions · {{ quiz.total_marks }} marks · {{ quiz.quizattempt_set.count }} attempts
-        </p>
-        <a href="{% url 'teacher_quiz_detail' quiz.pk %}" class="btn btn-outline btn-sm btn-block">Manage Quiz</a>
-      </div>
-    {% endfor %}
-  {% empty %}
-    <p style="color:var(--g500);">No quizzes yet. Click "+ Create Quiz" above.</p>
-  {% endfor %}
-</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
+
+    const canvas = document.getElementById('gradingChart');
+    if (canvas) {
+      new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: ['Graded', 'Pending Grading'],
+          datasets: [{
+            data: [{{ submitted_count }}, {{ pending_grading }}],
+            backgroundColor: ['#16A34A', '#F59E0B'],
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '70%',
+          plugins: { 
+            legend: { position: 'bottom', labels: { padding: 20, font: { family: 'Inter' } } } 
+          }
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}

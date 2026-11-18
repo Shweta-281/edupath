@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Attendance · {{ live.title }}{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 32px;">
+  <a href="{% url 'live_list' %}" style="color: var(--g500); text-decoration: none; font-size: 14px;">
+    <i class="bi bi-arrow-left"></i> Back to Live Classes
+  </a>
+  <h2 style="font-size: 32px; font-weight: 800; color: var(--g900); margin: 8px 0;">
+    📊 {{ live.title }} — Attendance
+  </h2>
+  <p style="color: var(--g500); font-size: 15px; margin: 0;">
+    {{ live.course.title }} · {{ live.scheduled_at|date:"d M Y, h:i A" }} · {{ live.duration_minutes }} min
+  </p>
+</div>
+
+<!-- Summary strip -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 32px;">
+  <div class="card" style="padding: 20px; border-left: 4px solid #2563EB;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Enrolled</div>
+    <h2 style="font-size: 28px; font-weight: 800; margin: 4px 0 0; color: var(--g900);">{{ total }}</h2>
+  </div>
+  <div class="card" style="padding: 20px; border-left: 4px solid #16A34A;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Present</div>
+    <h2 style="font-size: 28px; font-weight: 800; margin: 4px 0 0; color: #16A34A;">{{ present_count }}</h2>
+  </div>
+  <div class="card" style="padding: 20px; border-left: 4px solid #DC2626;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Absent</div>
+    <h2 style="font-size: 28px; font-weight: 800; margin: 4px 0 0; color: #DC2626;">{{ absent_count }}</h2>
+  </div>
+  <div class="card" style="padding: 20px; border-left: 4px solid #5B21B6;">
+    <div style="font-size: 12px; font-weight: 600; color: var(--g500); text-transform: uppercase;">Attendance %</div>
+    <h2 style="font-size: 28px; font-weight: 800; margin: 4px 0 0; color: var(--g900);">{{ present_pct }}%</h2>
+  </div>
+</div>
+
+<!-- Attendance table -->
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--g100);">
+  <table class="table" style="margin: 0; width: 100%; text-align: left;">
+    <thead>
+      <tr style="background: #F8FAFC; border-bottom: 1px solid var(--g100);">
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Student</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Duration</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Attendance</th>
+        <th style="padding: 14px 20px; color: var(--g500); font-size: 12px; text-transform: uppercase;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr style="border-bottom: 1px solid var(--g100);">
+        <td style="padding: 14px 20px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%;
+                        background: var(--p100); color: var(--p700);
+                        display: flex; align-items: center; justify-content: center;
+                        font-weight: 700; font-size: 13px;">
+              {{ r.student.user.username|first|upper }}
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--g900);">
+                {{ r.student.user.get_full_name|default:r.student.user.username }}
+              </div>
+              <div style="font-size: 12px; color: var(--g500);">Class {{ r.student.grade }}</div>
+            </div>
+          </div>
+        </td>
+        <td style="padding: 14px 20px; color: var(--g700);">
+          {% if r.record %}{{ r.duration_min }} min{% else %}—{% endif %}
+        </td>
+        <td style="padding: 14px 20px;">
+          {% if r.record %}
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="flex: 1; max-width: 120px; height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden;">
+                <div style="height: 100%; width: {{ r.percent }}%;
+                            background: {% if r.percent >= 75 %}#16A34A{% elif r.percent >= 50 %}#F59E0B{% else %}#DC2626{% endif %};"></div>
+              </div>
+              <span style="font-size: 13px; font-weight: 600; color: var(--g700);">{{ r.percent }}%</span>
+            </div>
+          {% else %}
+            <span style="color: var(--g500); font-size: 13px;">No data</span>
+          {% endif %}
+        </td>
+        <td style="padding: 14px 20px;">
+          {% if r.is_present %}
+            <span class="badge badge-green">Present</span>
+          {% elif r.record %}
+            <span class="badge badge-amber">Partial</span>
+          {% else %}
+            <span class="badge badge-red">Absent</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4" style="text-align: center; color: var(--g500); padding: 40px;">
+          No students enrolled in this course.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

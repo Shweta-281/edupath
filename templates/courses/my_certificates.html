@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}My Certificates{% endblock %}
+{% block content %}
+
+<div style="margin-bottom: 32px;">
+  <h2 style="font-size: 32px; font-weight: 800; color: var(--g900); margin-bottom: 8px;">🎓 My Certificates</h2>
+  <p style="color: var(--g500); font-size: 16px;">Your earned certificates. Click any card to re-download the PDF.</p>
+</div>
+
+{% if certificates %}
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px;">
+  {% for cert in certificates %}
+  <div class="card" style="padding: 24px; border-left: 5px solid #5B21B6; display: flex; flex-direction: column; gap: 12px;">
+    <div style="font-size: 40px;">🏅</div>
+    <div>
+      <h4 style="font-size: 18px; font-weight: 700; color: var(--g900); margin: 0 0 4px;">
+        {{ cert.course.title }}
+      </h4>
+      <p style="color: var(--g500); font-size: 13px; margin: 0;">
+        Issued: {{ cert.issued_at|date:"d M Y" }}
+      </p>
+      <p style="color: var(--g500); font-size: 12px; margin: 4px 0 0; font-family: monospace;">
+        ID: {{ cert.serial }}
+      </p>
+    </div>
+    <div style="display: flex; gap: 8px; margin-top: auto;">
+      <a href="{% url 'download_certificate' cert.course.id %}"
+         class="btn"
+         style="background: #DC2626; color: white; padding: 10px 16px; border-radius: 8px;
+                text-decoration: none; font-weight: 700; display: inline-flex;
+                align-items: center; gap: 6px; font-size: 14px;">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF
+      </a>
+      <a href="{% url 'verify_certificate' cert.serial %}"
+         class="btn"
+         style="background: #F8FAFC; color: var(--g900); padding: 10px 16px; border-radius: 8px;
+                text-decoration: none; font-weight: 600; border: 1px solid var(--g100);
+                font-size: 14px;">
+        Verify
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 60px 20px;">
+  <div style="font-size: 48px; margin-bottom: 16px;">🎓</div>
+  <h4 style="margin-bottom: 8px;">No certificates yet</h4>
+  <p style="color: var(--g500); margin-bottom: 20px;">
+    Complete a course to 100% to earn your first certificate.
+  </p>
+  <a href="{% url 'course_list' %}" class="btn btn-primary">Browse Courses</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -12,4 +12,13 @@ urlpatterns = [
     path("teacher/create/", views.teacher_create_quiz, name="teacher_create_quiz"),
     path("teacher/<int:pk>/", views.teacher_quiz_detail, name="teacher_quiz_detail"),
     path("teacher/<int:pk>/regenerate/", views.teacher_regenerate_quiz, name="teacher_regenerate_quiz"),
+    
+    # Assignment URLs
+    path('assignments/teacher/', views.teacher_assignment_list, name='teacher_assignment_list'),
+    path('assignments/teacher/create/', views.teacher_create_assignment, name='teacher_create_assignment'),
+    path('assignments/teacher/<int:pk>/', views.teacher_assignment_detail, name='teacher_assignment_detail'),
+    path('assignments/teacher/grade/<int:submission_id>/', views.grade_submission, name='grade_submission'),
+    
+    path('assignments/student/', views.student_assignment_list, name='student_assignment_list'),
+    path('assignments/student/submit/<int:pk>/', views.submit_assignment, name='submit_assignment'),
 ]

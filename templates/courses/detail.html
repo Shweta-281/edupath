@@ -3,11 +3,30 @@
 
 <!-- ========== COURSE HEADER ========== -->
 <div class="card" style="padding:40px; margin-bottom:40px; background:linear-gradient(135deg,#EDE9FE,#F5F3FF); border-radius: 16px; border: 1px solid var(--g100); box-shadow: var(--shadow-sm);">
-  <span class="badge" style="background: #fff; color: var(--p700); font-weight: 700; padding: 6px 14px;">Class {{ course.subject.grade }} · {{ course.subject.name }}</span>
+  <span class="badge" style="background: #fff; color: var(--p700); font-weight: 700; padding: 6px 14px;">Class {{ course.subject.grade }} · {{ course.subject.name }} · {{ course.subject.board }}</span>
   <h2 style="margin:16px 0; font-size:36px; font-weight: 800; color: var(--g900);">{{ course.title }}</h2>
+  
+  <!-- Star Rating & Teacher Link -->
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+      <div style="color: #F59E0B; font-size: 18px;">
+          {% if course.average_rating >= 1 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+          {% if course.average_rating >= 2 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+          {% if course.average_rating >= 3 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+          {% if course.average_rating >= 4 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+          {% if course.average_rating >= 5 %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+      </div>
+      <span style="font-weight: 700; color: var(--g900);">{{ course.average_rating }} / 5.0</span>
+      <span style="color: var(--g500); font-size: 14px;">({{ reviews.count }} reviews)</span>
+  </div>
+
+  <!-- Teacher Link -->
+  <p style="color: var(--g500); font-size: 14px; margin-bottom: 24px;">
+    Created by <a href="{% url 'teacher_profile' course.teacher.id %}" style="color: var(--p700); font-weight: 700; text-decoration: none;">{{ course.teacher.get_full_name|default:course.teacher.username }}</a>
+  </p>
+  
   <p style="color:var(--g700); max-width:720px; margin-bottom:32px; font-size: 16px; line-height: 1.6;">{{ course.description }}</p>
   
-  <div style="display:flex; gap:20px; align-items:center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px;">
+  <div style="display:flex; gap:20px; align-items:center; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 24px; flex-wrap: wrap;">
     <span style="font-size:32px; font-weight:800; color: var(--g900);">
         {% if course.is_free %}FREE{% else %}₹{{ course.price }}{% endif %}
     </span>
@@ -16,6 +35,24 @@
       {% if user.role == 'student' %}
         {% if enrolled %}
           <span class="badge badge-green" style="font-size: 15px; padding: 8px 16px;">✅ Enrolled</span>
+
+          <!-- NEW: Certificate button / progress lock -->
+          {% if progress.is_completed %}
+            <a href="{% url 'download_certificate' course.id %}"
+               class="btn"
+               style="background: #DC2626; color: white; padding: 12px 24px; border-radius: 8px;
+                      text-decoration: none; font-weight: 700; display: inline-flex;
+                      align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220,38,38,0.2);">
+              <i class="bi bi-award-fill"></i>
+              {% if has_certificate %}Download Certificate{% else %}Claim Your Certificate{% endif %}
+            </a>
+          {% else %}
+            <div style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px;
+                        background: var(--g50); border-radius: 8px; color: var(--g500); font-size: 14px; font-weight: 600;">
+              <i class="bi bi-lock-fill"></i>
+              {{ progress.percentage }}% complete · Certificate unlocks at 100%
+            </div>
+          {% endif %}
         {% else %}
           <a href="{% url 'checkout' course.pk %}" class="btn btn-success btn-lg" style="padding: 12px 32px; font-weight: 700; border-radius: 8px;">Enroll Now</a>
         {% endif %}
@@ -23,7 +60,25 @@
     {% else %}
       <a href="{% url 'login' %}" class="btn btn-primary btn-lg" style="padding: 12px 32px; font-weight: 700; border-radius: 8px;">Login to Enroll</a>
     {% endif %}
+
+    <!-- MANAGE CONTENT BUTTON (Only visible to course creator or admin) -->
+    {% if user == course.teacher or user.role == 'admin' %}
+      <a href="{% url 'teacher_manage_course' course.pk %}" class="btn" style="background: #0F172A; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin-left: auto;">
+        <i class="bi bi-gear-fill"></i> Manage Content
+      </a>
+    {% endif %}
   </div>
+</div>
+
+<!-- ========== Q&A FORUM LINK ========== -->
+<div class="card" style="padding: 24px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--p700); background: white; flex-wrap: wrap; gap: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+  <div>
+    <h4 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: var(--g900);">💬 Have a doubt? Ask your teacher!</h4>
+    <p style="margin: 0; color: var(--g500); font-size: 14px;">Join the course discussion forum to ask questions and see answers from teachers and peers.</p>
+  </div>
+  <a href="{% url 'discussion_list' course.id %}" class="btn btn-primary" style="padding: 12px 24px; font-weight: 600; border-radius: 8px; text-decoration: none; background: var(--p700); color: white; white-space: nowrap;">
+    Go to Q&A Forum <i class="bi bi-arrow-right"></i>
+  </a>
 </div>
 
 <!-- ========== PROFESSIONAL COURSE CONTENT ========== -->
@@ -55,7 +110,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <span style="font-size: 13px; color: var(--g500);"><i class="bi bi-clock"></i> {{ lec.duration_minutes }} min</span>
-                    <a href="{% url 'lecture_view' lec.pk %}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px; font-weight: 600;">Open</a>
+                    <a href="{% url 'lecture_view' lec.pk %}" class="btn btn-sm btn-primary" style="border-radius: 6px; font-weight: 600; padding: 6px 16px;">Start</a>
                 </div>
             </div>
             {% empty %}
@@ -87,6 +142,81 @@
         <p style="color: var(--g500); margin: 0;">No chapters available for this course yet.</p>
     </div>
     {% endfor %}
+</div>
+
+<!-- ========== REVIEWS SECTION ========== -->
+<div style="margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--g100);">
+  <h3 style="margin-bottom: 24px; font-size: 24px; font-weight: 800; color: var(--g900);">⭐ Student Reviews</h3>
+  
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start;">
+    
+    <!-- Left: Leave a Review Form -->
+    <div>
+      {% if enrolled and not has_reviewed %}
+        <div class="card" style="padding: 24px; border-radius: 12px; background: #F8FAFC; border: 1px solid var(--g100);">
+          <h5 style="font-weight: 700; margin-bottom: 16px;">Leave a Review</h5>
+          <form method="POST">
+            {% csrf_token %}
+            <div style="margin-bottom: 16px;">
+              <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 8px;">Rating</label>
+              <select name="rating" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #CBD5E1;">
+                <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
+                <option value="4">⭐⭐⭐⭐ Good</option>
+                <option value="3">⭐⭐⭐ Average</option>
+                <option value="2">⭐⭐ Poor</option>
+                <option value="1">⭐ Terrible</option>
+              </select>
+            </div>
+            <div style="margin-bottom: 16px;">
+              <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 8px;">Comment (Optional)</label>
+              <textarea name="comment" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #CBD5E1;" placeholder="What did you think of the course?"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; border-radius: 8px;">Submit Review</button>
+          </form>
+        </div>
+      {% elif not enrolled %}
+        <div class="card" style="padding: 24px; border-radius: 12px; text-align: center; color: var(--g500);">
+          <i class="bi bi-lock" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>
+          Enroll in this course to leave a review.
+        </div>
+      {% else %}
+        <div class="card" style="padding: 24px; border-radius: 12px; text-align: center; color: #16A34A; background: #DCFCE7; border: 1px solid #BBF7D0;">
+          <i class="bi bi-check-circle-fill" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>
+          Thank you! You have already reviewed this course.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: List of Reviews -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      {% for review in reviews %}
+        <div class="card" style="padding: 20px; border-radius: 12px; border: 1px solid var(--g100);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--p100); color: var(--p700); display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                {{ review.student.user.username|first|upper }}
+              </div>
+              <div>
+                <div style="font-weight: 700; color: var(--g900); font-size: 15px;">{{ review.student.user.get_full_name|default:review.student.user.username }}</div>
+                <div style="font-size: 12px; color: var(--g500);">{{ review.created_at|date:"d M Y" }}</div>
+              </div>
+            </div>
+            <div style="color: #F59E0B; font-size: 14px;">
+              {% for i in "12345"|make_list %}
+                {% if forloop.counter <= review.rating %}<i class="bi bi-star-fill"></i>{% else %}<i class="bi bi-star"></i>{% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <p style="margin: 0; color: var(--g700); font-size: 14px; line-height: 1.6;">{{ review.comment }}</p>
+        </div>
+      {% empty %}
+        <div style="text-align: center; padding: 40px; color: var(--g500); border: 1px dashed var(--g200); border-radius: 12px;">
+          No reviews yet. Be the first to review this course!
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
 </div>
 
 {% endblock %}

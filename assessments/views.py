@@ -1,4 +1,3 @@
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -15,6 +14,9 @@ from django.core.management import call_command
 from .forms import QuizCreateForm
 from .quiz_generator import generate_questions_for_quiz
 from django.db import transaction
+from .forms import AssignmentForm, SubmissionForm, GradeSubmissionForm
+from .models import Assignment, Submission
+from django.utils import timezone
 
 
 def get_student_profile(request):
@@ -294,6 +296,10 @@ def submit_quiz(request, attempt_id):
         attempt.score = score
         attempt.completed_at = timezone.now()
         attempt.save(update_fields=["score", "completed_at"])
+        
+        # NEW: Award XP (e.g., 10 XP per correct answer)
+        student.xp_points += (score * 10) 
+        student.save()
 
     return redirect("quiz_result", pk=attempt.pk)
 
@@ -325,3 +331,135 @@ def quiz_result(request, pk):
         "attempt": attempt,
         "answers": answers,
     })
+
+# ==========================================
+# NEW: ASSIGNMENT WORKFLOW VIEWS
+# ==========================================
+
+# --- TEACHER VIEWS ---
+
+@login_required
+def teacher_assignment_list(request):
+    if request.user.role not in ("teacher", "admin"):
+        messages.error(request, "Teachers only.")
+        return redirect("dashboard")
+
+    if request.user.role == "admin":
+        assignments = Assignment.objects.all().order_by('-due_date')
+    else:
+        # Assuming Course model has a 'teacher' field based on your quiz views
+        assignments = Assignment.objects.filter(course__teacher=request.user).order_by('-due_date')
+
+    return render(request, "assessments/teacher_assignment_list.html", {"assignments": assignments})
+
+@login_required
+def teacher_create_assignment(request):
+    if request.user.role not in ("teacher", "admin"):
+        return redirect("dashboard")
+
+    if request.method == "POST":
+        form = AssignmentForm(request.POST, request.FILES)
+        if form.is_valid():
+            assignment = form.save(commit=False)
+            assignment.save()
+            messages.success(request, "✅ Assignment created successfully!")
+            return redirect('teacher_assignment_list')
+    else:
+        form = AssignmentForm()
+
+    return render(request, "assessments/teacher_create_assignment.html", {"form": form})
+
+@login_required
+def teacher_assignment_detail(request, pk):
+    if request.user.role not in ("teacher", "admin"):
+        return redirect("dashboard")
+
+    assignment = get_object_or_404(Assignment, pk=pk)
+    submissions = assignment.submissions.select_related('student__user').all()
+
+    return render(request, "assessments/teacher_assignment_detail.html", {
+        "assignment": assignment,
+        "submissions": submissions
+    })
+
+@login_required
+def grade_submission(request, submission_id):
+    if request.user.role not in ("teacher", "admin"):
+        return redirect("dashboard")
+
+    submission = get_object_or_404(Submission, pk=submission_id)
+    
+    if request.method == "POST":
+        form = GradeSubmissionForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Grade and feedback saved!")
+            return redirect('teacher_assignment_detail', pk=submission.assignment.pk)
+    else:
+        form = GradeSubmissionForm(instance=submission)
+
+    return render(request, "assessments/grade_submission.html", {
+        "form": form,
+        "submission": submission
+    })
+
+# --- STUDENT VIEWS ---
+
+@login_required
+def student_assignment_list(request):
+    if request.user.role != "student":
+        return redirect("dashboard")
+
+    student_profile = request.user.student_profile
+    # Get courses the student is enrolled in
+    enrollments = Enrollment.objects.filter(student=student_profile, is_active=True)
+    enrolled_courses = [e.course for e in enrollments]
+
+    # Get assignments for those courses
+    assignments = Assignment.objects.filter(course__in=enrolled_courses).order_by('due_date')
+    
+    # Map submissions to assignments to show if they already submitted
+    submissions = {s.assignment_id: s for s in Submission.objects.filter(student=student_profile)}
+    
+    assignment_data = []
+    for a in assignments:
+        assignment_data.append({
+            'assignment': a,
+            'submission': submissions.get(a.id),
+            'is_overdue': a.due_date < timezone.now() and not submissions.get(a.id)
+        })
+
+    return render(request, "assessments/student_assignment_list.html", {"assignment_data": assignment_data})
+
+@login_required
+def submit_assignment(request, pk):
+    if request.user.role != "student":
+        return redirect("dashboard")
+    
+    assignment = get_object_or_404(Assignment, pk=pk)
+    student_profile = request.user.student_profile
+
+    # Check if already submitted
+    existing_submission = Submission.objects.filter(assignment=assignment, student=student_profile).first()
+    if existing_submission:
+        messages.error(request, "You have already submitted this assignment.")
+        return redirect('student_assignment_list')
+
+    if request.method == "POST":
+        form = SubmissionForm(request.POST, request.FILES)
+        if form.is_valid():
+            submission = form.save(commit=False)
+            submission.assignment = assignment
+            submission.student = student_profile
+            submission.save()
+            
+            # NEW: Award XP for assignment submission
+            student_profile.xp_points += 50
+            student_profile.save()
+            
+            messages.success(request, "Assignment submitted successfully!")
+            return redirect('student_assignment_list')
+    else:
+        form = SubmissionForm()
+
+    return render(request, "assessments/submit_assignment.html", {"form": form, "assignment": assignment})

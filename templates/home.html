@@ -1,82 +1,232 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- ========== NEW SPLIT HERO SECTION ========== -->
-<div class="hero hero-split">
-  <div class="hero-content">
-    <h1>Learn Smarter with EduPath</h1>
-    <p>Interactive courses, live classes, and instant-feedback quizzes — built for students of Classes 5 to 10.</p>
-    <div class="hero-buttons">
-      <a href="{% url 'course_list' %}" class="btn btn-light btn-lg">Explore Courses →</a>
-      <a href="{% url 'register' %}" class="btn btn-glass btn-lg">Join Free</a>
+<style>
+    /* Professional Hover Zoom Effect for Course Images */
+    .course-card-hover:hover .course-img {
+        transform: scale(1.08);
+    }
+    .course-img {
+        transition: transform 0.4s ease;
+    }
+</style>
+
+<!-- ========== 1. ENHANCED SPLIT HERO SECTION ========== -->
+<div class="hero hero-split" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 40px; padding: 60px 40px; border-radius: 24px; background: linear-gradient(135deg, #6a28d9, #8b5cf6); color: white; margin-bottom: 40px;">
+  
+  <!-- Left Content -->
+  <div class="hero-content" style="flex: 1; min-width: 300px; z-index: 2;">
+    
+    <!-- Badge -->
+    <div style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.2); color: white; padding: 6px 16px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; backdrop-filter: blur(5px);">
+      <i class="bi bi-stars" style="margin-right: 8px;"></i> #1 Platform for Classes 5-10
+    </div>
+    
+    <!-- Heading -->
+    <h1 style="font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; color: white;">
+      Master Your Subjects with <span style="color: #fbbf24;">AI-Powered</span> Learning
+    </h1>
+    
+    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; color: rgba(255,255,255,0.9);">
+      Interactive courses, live doubt-solving classes, and instant-feedback quizzes — built for the Indian curriculum.
+    </p>
+    
+    <div class="hero-buttons" style="display: flex; gap: 16px; margin-bottom: 40px; flex-wrap: wrap;">
+      <!-- Primary Button -->
+      <a href="{% url 'course_list' %}" class="btn btn-lg" style="background: white; color: #6a28d9; padding: 12px 28px; font-weight: 700; border-radius: 8px; text-decoration: none;">
+        Explore Courses <i class="bi bi-arrow-right"></i>
+      </a>
+      <!-- Secondary Button -->
+      <a href="{% url 'register' %}" class="btn btn-lg" style="background: transparent; color: white; padding: 12px 28px; font-weight: 600; border-radius: 8px; border: 2px solid white; text-decoration: none;">
+        Watch Demo
+      </a>
+    </div>
+
+    <!-- Student Avatars -->
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <div style="display: flex;">
+        <img src="https://i.pravatar.cc/100?img=1" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6a28d9; margin-right: -12px; z-index: 3;" alt="Student">
+        <img src="https://i.pravatar.cc/100?img=2" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6a28d9; margin-right: -12px; z-index: 2;" alt="Student">
+        <img src="https://i.pravatar.cc/100?img=3" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #6a28d9; z-index: 1;" alt="Student">
+      </div>
+      <div>
+        <div style="font-weight: 700; color: white; font-size: 15px;">10,000+ Students</div>
+        <div style="font-size: 13px; color: rgba(255,255,255,0.8);">learning right now</div>
+      </div>
     </div>
   </div>
   
-  <div class="hero-image-wrapper">
-    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" alt="Students learning online" class="hero-img">
+  <!-- Right Image & Floating Badges -->
+  <div class="hero-image-wrapper" style="flex: 1; min-width: 300px; position: relative; z-index: 1;">
     
-    <div class="floating-badge">
-      <div style="font-size: 24px; margin-bottom: 4px;">⭐</div>
+    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2071&auto=format&fit=crop" alt="Students learning online" style="width: 100%; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); display: block;">
+    
+    <!-- Floating Badge 1: Rating -->
+    <div style="position: absolute; bottom: 20px; left: -20px; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; width: max-content; z-index: 10;">
+      <div style="font-size: 24px;">⭐</div>
       <div>
-        <strong style="display: block; font-size: 16px; color: var(--g900);">4.9/5 Rating</strong>
-        <span style="font-size: 12px; color: var(--g500);">From 2,000+ students</span>
+        <strong style="display: block; font-size: 16px; color: #0f172a;">4.9/5 Rating</strong>
+        <span style="font-size: 12px; color: #64748b;">From 2,000+ reviews</span>
+      </div>
+    </div>
+
+    <!-- Floating Badge 2: Live Class -->
+    <div style="position: absolute; top: 30px; right: -20px; background: white; padding: 12px 20px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; width: max-content; z-index: 10;">
+      <div style="background: #dcfce7; color: #16a34a; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 18px;">
+        <i class="bi bi-camera-video-fill"></i>
+      </div>
+      <div>
+        <strong style="display: block; font-size: 14px; color: #0f172a;">Live Class</strong>
+        <span style="font-size: 12px; color: #64748b;">Physics - Motion</span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ========== FEATURED COURSES ========== -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin: 40px 0 20px;">
-  <h3 style="margin: 0; font-size: 24px;">⭐ Featured Courses</h3>
-  <a href="{% url 'course_list' %}" style="color: var(--p700); font-weight: 600; text-decoration: none;">View All →</a>
+<!-- ========== 2. TRUST BAR ========== -->
+<div style="background: white; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; padding: 24px 0; margin: 20px 0 60px; text-align: center;">
+  <p style="font-size: 13px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 16px;">Aligned with top Indian Curricula</p>
+  <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; opacity: 0.6; font-weight: 800; font-size: 20px; color: #0f172a;">
+    <span><i class="bi bi-book"></i> CBSE</span>
+    <span><i class="bi bi-book"></i> ICSE</span>
+    <span><i class="bi bi-book"></i> State Boards</span>
+    <span><i class="bi bi-book"></i> NCERT</span>
+  </div>
 </div>
 
-<div class="grid-3">
+<!-- ========== 3. UPGRADED FEATURED COURSES ========== -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin: 40px 0 24px;">
+  <div>
+    <h3 style="margin: 0 0 8px 0; font-size: 32px; font-weight: 800; color: #0f172a;">Top Rated Courses</h3>
+    <p style="color: #64748b; margin: 0; font-size: 16px;">Hand-picked courses to boost your grades.</p>
+  </div>
+  <a href="{% url 'course_list' %}" style="color: #6a28d9; font-weight: 600; text-decoration: none;">View All <i class="bi bi-arrow-right"></i></a>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 80px;">
   {% for course in featured %}
-    <!-- Premium Course Card -->
-    <div class="card card-course card-hover" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+    <div class="card course-card-hover" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; border-radius: 16px; border: 1px solid #e2e8f0; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s;" onmouseover="this.style.transform='translateY(-8px)'; this.style.boxShadow='0 20px 30px rgba(0,0,0,0.08)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0,0,0,0.05)';">
       
-      <!-- 🔥 BULLETPROOF IMAGE FALLBACK -->
-      <div style="height: 160px; position: relative; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid var(--g100); background: {% cycle 'linear-gradient(135deg, #EDE9FE, #F5F3FF)' 'linear-gradient(135deg, #E0F2FE, #F0F9FF)' 'linear-gradient(135deg, #FCE7F3, #FDF2F8)' %}; overflow: hidden;">
-        
-        <!-- Default Subject Icon (Shows if image fails) -->
-        <i class="bi {{ course.subject.icon|default:'bi-journal-bookmark-fill' }}" style="font-size: 48px; color: var(--p700); opacity: 0.8; position: absolute;"></i>
-        
-        <!-- Actual Thumbnail (Hides itself if the link is broken) -->
+      <!-- Image Area -->
+      <div style="height: 180px; position: relative; overflow: hidden; border-radius: 16px 16px 0 0;">
+        <!-- Top Badge: Class -->
+        <span style="position: absolute; top: 12px; left: 12px; background: white; padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; color: #0f172a; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          Class {{ course.subject.grade }}
+        </span>
+
+        <!-- Image Logic -->
         {% if course.thumbnail %}
-          <img src="{{ course.thumbnail.url }}" 
-               style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1;" 
-               onerror="this.style.display='none';">
+          <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="course-img" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; position: absolute; top: 0; left: 0; z-index: 1;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          
+          <!-- Fallback if image breaks -->
+          <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; background: {% cycle 'linear-gradient(135deg, #EDE9FE, #F5F3FF)' 'linear-gradient(135deg, #E0F2FE, #F0F9FF)' 'linear-gradient(135deg, #FCE7F3, #FDF2F8)' %};">
+            <i class="bi {{ course.subject.icon|default:'bi-journal-bookmark-fill' }}" style="font-size: 48px; color: #6a28d9; opacity: 0.8;"></i>
+          </div>
+        {% else %}
+          <!-- Default Placeholder if no image uploaded -->
+          <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: {% cycle 'linear-gradient(135deg, #EDE9FE, #F5F3FF)' 'linear-gradient(135deg, #E0F2FE, #F0F9FF)' 'linear-gradient(135deg, #FCE7F3, #FDF2F8)' %};">
+            <i class="bi {{ course.subject.icon|default:'bi-journal-bookmark-fill' }}" style="font-size: 48px; color: #6a28d9; opacity: 0.8;"></i>
+          </div>
         {% endif %}
       </div>
       
-      <!-- Card Body -->
+      <!-- Body Area -->
       <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
+        <h4 style="font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; color: #0f172a;">{{ course.title }}</h4>
+        <p style="color: #64748b; font-size: 14px; line-height: 1.5; margin-bottom: 16px; flex: 1;">{{ course.description|truncatewords:15 }}</p>
         
-        <!-- Badges -->
-        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-          <span class="badge badge-outline">Class {{ course.subject.grade }}</span>
-          <span class="badge badge-outline">{{ course.subject.name }}</span>
+        <!-- Meta (Rating & Duration) -->
+        <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <i class="bi bi-star-fill" style="color: #fbbf24;"></i> <strong>{{ course.average_rating|default:"New" }}</strong> ({{ course.reviews.count }})
+          </span>
+          <span style="display: flex; align-items: center; gap: 4px;">
+            <i class="bi bi-clock"></i> {{ course.chapters.count }} Chapters
+          </span>
         </div>
-        
-        <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 8px; line-height: 1.3;">{{ course.title }}</h4>
-        <p style="color: var(--g500); font-size: 14px; line-height: 1.5; margin-bottom: 24px; flex: 1;">{{ course.description|truncatewords:15 }}</p>
-        
+
         <!-- Price & Button -->
-        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--g100); padding-top: 16px; margin-top: auto;">
-          <div style="font-size: 22px; font-weight: 800; color: var(--g900);">
-            {% if course.is_free %}FREE{% else %}₹{{ course.price }}{% endif %}
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 24px; font-weight: 800; color: #0f172a;">
+            {% if course.is_free %}
+              FREE
+            {% else %}
+              ₹{{ course.price }} 
+              <span style="font-size: 14px; font-weight: 400; color: #64748b; text-decoration: line-through; margin-left: 4px;">₹{{ course.price|add:"500" }}</span>
+            {% endif %}
           </div>
-          <a href="{% url 'course_detail' course.pk %}" class="btn btn-primary btn-sm" style="padding: 8px 16px;">
+          <a href="{% url 'course_detail' course.pk %}" style="background: #6a28d9; color: white; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; transition: 0.2s;" onmouseover="this.style.background='#8b5cf6';" onmouseout="this.style.background='#6a28d9';">
             View Course
           </a>
         </div>
-
       </div>
     </div>
   {% empty %}
-    <p style="color: var(--g500);">No courses yet. Add them from the admin panel.</p>
+    <p style="color: #64748b;">No courses yet. Add them from the admin panel.</p>
   {% endfor %}
+</div>
+
+<!-- ========== 4. WHY CHOOSE US (Features) ========== -->
+<div style="margin: 80px 0; text-align: center;">
+  <h3 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 12px;">Why Students Love EduPath</h3>
+  <p style="color: #64748b; font-size: 16px; max-width: 600px; margin: 0 auto 48px;">We combine cutting-edge technology with expert teaching to give you the best learning experience.</p>
+  
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+    <!-- Feature 1 -->
+    <div style="padding: 32px; background: white; border-radius: 16px; border: 1px solid #e2e8f0; text-align: left; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05)';">
+      <div style="width: 56px; height: 56px; background: #e0e7ff; color: #4f46e5; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 24px;">
+        <i class="bi bi-robot"></i>
+      </div>
+      <h4 style="font-weight: 700; font-size: 20px; color: #0f172a; margin-bottom: 12px;">AI-Powered Doubt Solving</h4>
+      <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0;">Stuck on a question? Our AI assistant explains concepts instantly, 24/7.</p>
+    </div>
+
+    <!-- Feature 2 -->
+    <div style="padding: 32px; background: white; border-radius: 16px; border: 1px solid #e2e8f0; text-align: left; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05)';">
+      <div style="width: 56px; height: 56px; background: #dcfce7; color: #16a34a; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 24px;">
+        <i class="bi bi-camera-video"></i>
+      </div>
+      <h4 style="font-weight: 700; font-size: 20px; color: #0f172a; margin-bottom: 12px;">Live Interactive Classes</h4>
+      <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0;">Join live sessions with expert teachers. Ask questions and get instant answers.</p>
+    </div>
+
+    <!-- Feature 3 -->
+    <div style="padding: 32px; background: white; border-radius: 16px; border: 1px solid #e2e8f0; text-align: left; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 6px -1px rgba(0, 0, 0, 0.05)';">
+      <div style="width: 56px; height: 56px; background: #fef3c7; color: #d97706; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 24px;">
+        <i class="bi bi-graph-up-arrow"></i>
+      </div>
+      <h4 style="font-weight: 700; font-size: 20px; color: #0f172a; margin-bottom: 12px;">Parent Progress Tracking</h4>
+      <p style="color: #64748b; font-size: 15px; line-height: 1.6; margin: 0;">Parents get detailed reports on attendance, quiz scores, and areas of improvement.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ========== 5. CALL TO ACTION BANNER ========== -->
+<div style="background: linear-gradient(135deg, #6a28d9, #4c1d95); border-radius: 24px; padding: 80px 40px; text-align: center; margin-bottom: 80px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(106, 40, 217, 0.2);">
+  
+  <!-- Decorative circles -->
+  <div style="position: absolute; top: -80px; left: -80px; width: 250px; height: 250px; background: rgba(255,255,255,0.08); border-radius: 50%;"></div>
+  <div style="position: absolute; bottom: -100px; right: -50px; width: 300px; height: 300px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+  
+  <div style="position: relative; z-index: 1;">
+    <h2 style="font-size: 40px; font-weight: 800; margin-bottom: 16px; color: white; letter-spacing: -0.5px;">Ready to Score Higher?</h2>
+    
+    <p style="font-size: 18px; color: rgba(255,255,255,0.85); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+      Join thousands of students who are already learning smarter with EduPath. Start your journey today.
+    </p>
+    
+    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+      <!-- Primary Button -->
+      <a href="{% url 'register' %}" style="background: white; color: #6a28d9; font-weight: 700; font-size: 16px; padding: 16px 36px; border-radius: 10px; text-decoration: none; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        Join for Free
+      </a>
+      
+      <!-- Secondary Button -->
+      <a href="{% url 'course_list' %}" style="background: rgba(255,255,255,0.1); color: white; font-weight: 600; font-size: 16px; padding: 16px 36px; border-radius: 10px; text-decoration: none; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+        Browse Courses
+      </a>
+    </div>
+  </div>
 </div>
 
 {% endblock %}

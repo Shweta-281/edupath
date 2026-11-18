@@ -2,22 +2,70 @@
 {% block title %}Parent Dashboard{% endblock %}
 {% block content %}
 
-<!-- Header & Link Child Button -->
-<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+<!-- Header: Title + Download All + Link Child -->
+<div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;">
   <div>
     <h2 style="margin-bottom: 8px;">👨‍👩‍👧 Parent Dashboard</h2>
-    <p style="color: var(--g500);">Track your child's progress, quiz scores, and attendance at a glance.</p>
+    <p style="color: var(--g500); margin: 0;">Track your child's progress, quiz scores, and attendance at a glance.</p>
   </div>
-  <a href="{% url 'link_child' %}" class="btn btn-primary">+ Link New Child</a>
+
+  <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+    {% if child_data %}
+      <a href="{% url 'download_all_children_report_cards' %}"
+         class="btn"
+         style="background: #DC2626; color: white; padding: 10px 20px;
+                border-radius: 8px; text-decoration: none; font-weight: 700;
+                display: inline-flex; align-items: center; gap: 8px;
+                box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
+        <i class="bi bi-file-earmark-zip-fill"></i>
+        Download All Report Cards
+      </a>
+    {% endif %}
+    <a href="{% url 'link_child' %}" class="btn btn-primary">+ Link New Child</a>
+  </div>
 </div>
 
 <!-- Main Loop -->
 {% for data in child_data %}
 <div class="card" style="margin-top:24px;padding:28px;">
-  
-  <!-- Child Info Header -->
-  <h4 style="font-size:20px;margin-bottom:4px;">{{ data.child.get_full_name|default:data.child.username }}</h4>
-  <p style="color:var(--g500);font-size:13px;margin-bottom:20px;">Class {{ data.profile.grade }} · {{ data.child.email }}</p>
+
+  <!-- Child Info Header + Download Report Card Button -->
+  <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px; gap: 16px; flex-wrap: wrap;">
+    <div>
+      <h4 style="font-size:20px;margin-bottom:4px;">{{ data.child.get_full_name|default:data.child.username }}</h4>
+      <p style="color:var(--g500);font-size:13px;margin:0;">Class {{ data.profile.grade }} · {{ data.child.email }}</p>
+    </div>
+
+    <!-- NEW: Download Report Card (per child) -->
+    <a href="{% url 'download_report_card_for_child' data.profile.id %}"
+       class="btn"
+       style="background: #DC2626; color: white; padding: 10px 20px; border-radius: 8px;
+              text-decoration: none; font-weight: 700; display: inline-flex;
+              align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+              font-size: 14px; white-space: nowrap;">
+      <i class="bi bi-file-earmark-pdf-fill" style="font-size: 16px;"></i>
+      Download Report Card
+    </a>
+  </div>
+
+  <!-- 🔥 AI RISK PREDICTOR CARD 🔥 -->
+  {% if data.profile.risk_status %}
+  <div style="margin-bottom: 24px; background: {{ data.profile.risk_status.bg }}; border-left: 5px solid {{ data.profile.risk_status.color }}; padding: 16px 20px; border-radius: 8px; display: flex; align-items: flex-start; gap: 16px;">
+    <div style="font-size: 28px;">
+      {% if data.profile.risk_status.label == 'High Risk' %}🚨
+      {% elif data.profile.risk_status.label == 'Medium Risk' %}⚠️
+      {% else %}✅{% endif %}
+    </div>
+    <div>
+      <div style="font-size: 18px; font-weight: 800; color: {{ data.profile.risk_status.color }}; margin-bottom: 4px;">
+        AI Student Status: {{ data.profile.risk_status.label }}
+      </div>
+      <p style="margin: 0; color: {{ data.profile.risk_status.color }}; font-size: 14px; opacity: 0.9;">
+        {{ data.profile.risk_status.msg }}
+      </p>
+    </div>
+  </div>
+  {% endif %}
 
   <!-- Stat Cards -->
   <div class="grid-3" style="margin-bottom:24px;">
@@ -85,10 +133,9 @@
     }
 
     {% for data in child_data %}
-      // 🛠️ THE FIX: Wrapping each child's script in its own block scope
       {
         const quizEl = document.getElementById("quizChart{{ data.child.id }}");
-        const attEl = document.getElementById("attChart{{ data.child.id }}");
+        const attEl  = document.getElementById("attChart{{ data.child.id }}");
 
         if (quizEl) {
           new Chart(quizEl, {

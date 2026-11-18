@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}System Audit Logs{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h2 class="page-title">🛡️ System Audit Logs</h2>
+  <p class="page-subtitle">A permanent record of critical actions taken by students, teachers, and admins.</p>
+</div>
+
+<div class="card" style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; max-width: 800px; margin: 0 auto;">
+  
+  <div style="position: relative; border-left: 2px solid var(--brand-primary-light); margin-left: 16px; padding-left: 32px;">
+    
+    {% for log in logs %}
+    <div style="margin-bottom: 32px; position: relative;">
+      <!-- The Timeline Dot -->
+      <div style="position: absolute; left: -41px; top: 4px; width: 16px; height: 16px; border-radius: 50%; background: var(--brand-primary); border: 4px solid white;"></div>
+      
+      <!-- Log Content -->
+      <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px;">
+        {{ log.timestamp|date:"d M Y, h:i A" }}
+      </div>
+      <div style="font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+        {{ log.action }}
+      </div>
+      <div style="font-size: 14px; color: var(--text-muted);">
+        {{ log.details }}
+      </div>
+      <div style="font-size: 12px; color: var(--brand-primary); margin-top: 6px; font-weight: 500;">
+        <i class="bi bi-person-circle"></i> Action by: {{ log.user.username|default:"System" }}
+      </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+      No system logs recorded yet. Go change a grade or enroll in a course to see the magic!
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+
+{% endblock %}

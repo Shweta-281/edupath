@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Manage {{ course.title }}{% endblock %}
+{% block content %}
+
+<div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px;">
+  <div>
+    <h2 class="page-title">🛠️ Manage Course Content</h2>
+    <p class="page-subtitle">{{ course.title }} · Class {{ course.subject.grade }}</p>
+  </div>
+  <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline" style="padding: 10px 20px; border-radius: 8px; text-decoration: none; border: 1px solid var(--border-color); color: var(--text-main); font-weight: 600;">View Public Page</a>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start;">
+  
+  <!-- LEFT: Current Curriculum -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    {% for chapter in chapters %}
+      <div class="card" style="padding: 0; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color);">
+        <div style="background: #F8FAFC; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color);">
+          <h4 style="margin: 0; font-weight: 700; font-size: 16px;">{{ chapter.title }}</h4>
+          <span class="badge" style="background: var(--brand-primary-light); color: var(--brand-primary);">{{ chapter.lectures.count }} Lectures</span>
+        </div>
+        
+        <div style="padding: 16px 20px;">
+          {% for lecture in chapter.lectures.all %}
+            <div style="display: flex; justify-content: space-between; padding: 12px; background: #F1F5F9; border-radius: 8px; margin-bottom: 8px;">
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <i class="bi bi-play-btn" style="color: var(--brand-primary);"></i>
+                <span style="font-size: 14px; font-weight: 500;">{{ lecture.title }}</span>
+              </div>
+              <span style="font-size: 13px; color: var(--text-muted);">{{ lecture.duration_minutes }} min</span>
+            </div>
+          {% empty %}
+            <p style="color: var(--text-muted); font-size: 14px; margin: 0;">No lectures in this chapter yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="card" style="text-align: center; padding: 40px; border: 1px dashed var(--border-color);">
+        <p style="color: var(--text-muted); margin: 0;">This course has no chapters. Add one using the form on the right!</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- RIGHT: Add Content Forms -->
+  <div style="display: flex; flex-direction: column; gap: 24px; position: sticky; top: 100px;">
+    
+    <!-- Add Chapter Form -->
+    <div class="card" style="padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+      <h4 style="font-weight: 700; margin-bottom: 16px;">➕ Add New Chapter</h4>
+      <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 16px;">
+          {{ chapter_form.title }}
+        </div>
+        <button type="submit" name="add_chapter" class="btn btn-primary" style="width: 100%; padding: 10px; border-radius: 8px;">Create Chapter</button>
+      </form>
+    </div>
+
+    <!-- Add Lecture Form -->
+    <div class="card" style="padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+      <h4 style="font-weight: 700; margin-bottom: 16px;">🎥 Add New Lecture</h4>
+      <form method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Select Chapter</label>
+          <select name="chapter_id" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <option value="">-- Choose Chapter --</option>
+            {% for chapter in chapters %}
+              <option value="{{ chapter.id }}">{{ chapter.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Lecture Title</label>
+          {{ lecture_form.title }}
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Duration (Mins)</label>
+          {{ lecture_form.duration_minutes }}
+        </div>
+        <div style="margin-bottom: 12px;">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Video Embed URL</label>
+          {{ lecture_form.video_url }}
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; display: block;">Notes / Content</label>
+          {{ lecture_form.content }}
+        </div>
+        <button type="submit" name="add_lecture" class="btn" style="width: 100%; background: #0F172A; color: white; padding: 10px; border-radius: 8px; font-weight: 600;">Add Lecture</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

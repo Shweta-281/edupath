@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment.title }}{% endblock %}
+{% block content %}
+<div class="card" style="padding: 32px;">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h2>{{ assignment.title }}</h2>
+      <p style="color: var(--g500);">{{ assignment.course.title }} · Due: {{ assignment.due_date }}</p>
+    </div>
+    {% if assignment.attachment %}
+      <a href="{{ assignment.attachment.url }}" target="_blank" class="btn btn-outline">Download Reference</a>
+    {% endif %}
+  </div>
+
+  <h4 style="margin-bottom: 16px;">Student Submissions</h4>
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 2px solid var(--g100); text-align: left;">
+        <th style="padding: 12px;">Student</th>
+        <th style="padding: 12px;">Submitted At</th>
+        <th style="padding: 12px;">File</th>
+        <th style="padding: 12px;">Grade</th>
+        <th style="padding: 12px;">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sub in submissions %}
+      <tr style="border-bottom: 1px solid var(--g100);">
+        <td style="padding: 12px;">{{ sub.student.user.get_full_name|default:sub.student.user.username }}</td>
+        <td style="padding: 12px; color: var(--g500);">{{ sub.submitted_at|date:"d M Y, h:i A" }}</td>
+        <td style="padding: 12px;"><a href="{{ sub.submitted_file.url }}" target="_blank" style="color: var(--p700); font-weight: 600;">Download</a></td>
+        <td style="padding: 12px;">{% if sub.grade %}<span class="badge badge-green">{{ sub.grade }}</span>{% else %}<span class="badge badge-amber">Pending</span>{% endif %}</td>
+        <td style="padding: 12px;"><a href="{% url 'grade_submission' sub.pk %}" class="btn btn-sm btn-primary">Grade</a></td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--g500);">No submissions yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

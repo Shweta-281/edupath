@@ -46,6 +46,13 @@
       {{ form.grade.errors }}
     </div>
 
+    <!-- NEW: Board Selection -->
+    <div class="form-group">
+      <label for="{{ form.board.id_for_label }}">Board (students only)</label>
+      {{ form.board }}
+      {{ form.board.errors }}
+    </div>
+
     <div class="form-group">
       <label for="{{ form.password1.id_for_label }}">Password</label>
       {{ form.password1 }}

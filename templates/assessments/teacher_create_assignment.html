@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Create Assignment{% endblock %}
+{% block content %}
+
+<div style="max-width: 700px; margin: 0 auto;">
+  <div class="page-header">
+    <h2 class="page-title">Create New Assignment</h2>
+    <p class="page-subtitle">Provide instructions and upload any necessary files for your students.</p>
+  </div>
+
+  <div class="card" style="background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px rgba(0,0,0,0.02);">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: block;">Course</label>
+        {{ form.course }}
+        {% if form.course.errors %}<div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ form.course.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: block;">Assignment Title</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ form.title.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: block;">Instructions</label>
+        {{ form.description }}
+        {% if form.description.errors %}<div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ form.description.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: block;">Due Date & Time</label>
+        {{ form.due_date }}
+        {% if form.due_date.errors %}<div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ form.due_date.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="margin-bottom: 32px; padding: 16px; border: 1px dashed var(--border-color); border-radius: 8px; background: var(--bg-hover);">
+        <label style="font-weight: 600; font-size: 14px; color: var(--text-main); margin-bottom: 8px; display: block;">
+          <i class="bi bi-paperclip"></i> Reference File (Optional)
+        </label>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Upload a PDF, Word doc, or image for students to reference.</p>
+        {{ form.attachment }}
+        {% if form.attachment.errors %}<div style="color: #DC2626; font-size: 12px; margin-top: 4px;">{{ form.attachment.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div style="display: flex; gap: 12px;">
+        <a href="{% url 'teacher_assignment_list' %}" style="flex: 1; text-align: center; padding: 12px; border-radius: 8px; background: var(--bg-hover); color: var(--text-main); text-decoration: none; font-weight: 600; border: 1px solid var(--border-color);">Cancel</a>
+        <button type="submit" style="flex: 2; padding: 12px; border-radius: 8px; background: var(--brand-primary); color: white; border: none; font-weight: 600; font-size: 15px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          Publish Assignment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

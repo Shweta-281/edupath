@@ -2,12 +2,15 @@
 {% block content %}
 <h2>{{ live_class.title }}</h2>
 <p style="color:var(--g500);margin-bottom:20px;">{{ live_class.course.title }}</p>
+
 {% if error %}
   <div class="alert alert-error">{{ error }}</div>
 {% else %}
   <div id="jitsi" style="height:620px;border-radius:16px;overflow:hidden;"></div>
+
   <script src="https://meet.jit.si/external_api.js"></script>
   <script>
+    // --- Jitsi embed ---
     new JitsiMeetExternalAPI("meet.jit.si", {
       roomName: "{{ live_class.jitsi_room }}",
       parentNode: document.getElementById("jitsi"),
@@ -15,5 +18,40 @@
       configOverwrite: { prejoinPageEnabled: false }
     });
   </script>
+
+  {# --- LIVE ATTENDANCE TRACKING (students only) --- #}
+  {% if user.role == 'student' %}
+  <script>
+    (function() {
+      const CSRF_TOKEN = "{{ csrf_token }}";
+      const START_URL = "{% url 'start_live_attendance' live_class.id %}";
+      const BEAT_URL  = "{% url 'heartbeat_live_attendance' live_class.id %}";
+
+      // 1) Register join
+      fetch(START_URL, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF_TOKEN },
+      }).catch(err => console.warn('attendance start failed', err));
+
+      // 2) Heartbeat every 30 seconds
+      const beat = setInterval(function() {
+        fetch(BEAT_URL, {
+          method: 'POST',
+          headers: { 'X-CSRFToken': CSRF_TOKEN },
+        }).catch(function() { /* offline — ignore */ });
+      }, 30000);
+
+      // 3) Final ping when the student leaves the page
+      window.addEventListener('pagehide', function() {
+        clearInterval(beat);
+        fetch(BEAT_URL + '?final=1', {
+          method: 'POST',
+          headers: { 'X-CSRFToken': CSRF_TOKEN },
+          keepalive: true,
+        }).catch(function() { /* ignore */ });
+      });
+    })();
+  </script>
+  {% endif %}
 {% endif %}
 {% endblock %}

@@ -1,134 +1,38 @@
 {% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
 {% block content %}
 
-<style>
-    .notif-container {
-        max-width: 800px;
-        margin: 40px auto;
-        padding: 0 20px;
-    }
-    .notif-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 24px;
-    }
-    .notif-card {
-        display: flex;
-        gap: 16px;
-        padding: 24px;
-        border-radius: 12px;
-        background: #fff;
-        margin-bottom: 16px;
-        border: 1px solid var(--g100);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .notif-card.unread {
-        border-left: 5px solid var(--p700);
-        background: #FAF5FF;
-        box-shadow: 0 4px 12px rgba(91,33,182,0.05);
-    }
-    .notif-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-    }
-    .notif-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        flex-shrink: 0;
-    }
-    .icon-meeting { background: #EDE9FE; color: #5B21B6; }
-    .icon-alert { background: #FEF3C7; color: #D97706; }
-    .notif-content { flex: 1; }
-    .notif-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--g900);
-        margin-bottom: 4px;
-    }
-    .notif-date {
-        font-size: 13px;
-        color: var(--g500);
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .notif-message {
-        font-size: 14.5px;
-        color: var(--g700);
-        line-height: 1.5;
-        margin-bottom: 12px;
-    }
-    .btn-join {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: var(--p700);
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-        transition: 0.2s;
-    }
-    .btn-join:hover {
-        background: var(--p900);
-        box-shadow: 0 4px 12px rgba(91,33,182,0.3);
-    }
-</style>
-
-<div class="notif-container">
-    
-    <!-- Header -->
-    <div class="notif-header">
-        <div>
-            <h1 style="font-size: 28px; font-weight: 800; color: var(--g900); margin: 0;">🔔 Notifications</h1>
-            <p style="color: var(--g500); font-size: 14px; margin-top: 4px;">Stay updated with your classes and meetings.</p>
-        </div>
-    </div>
-
-    <!-- Notification List -->
-    {% for n in notifications %}
-        <div class="notif-card {% if not n.is_read %}unread{% endif %}">
-            
-            <!-- Dynamic Icon -->
-            {% if "Meeting" in n.title %}
-                <div class="notif-icon icon-meeting"><i class="bi bi-calendar-event"></i></div>
-            {% else %}
-                <div class="notif-icon icon-alert"><i class="bi bi-bell-fill"></i></div>
-            {% endif %}
-
-            <!-- Content -->
-            <div class="notif-content">
-                <h5 class="notif-title">{{ n.title }}</h5>
-                <div class="notif-date">
-                    <i class="bi bi-clock"></i> {{ n.created_at|date:"d M Y, h:i A" }}
-                </div>
-                <p class="notif-message">{{ n.message }}</p>
-                
-                <!-- Action Button -->
-                {% if n.link %}
-                    <a href="{{ n.link }}" class="btn-join" target="_blank">
-                        <i class="bi bi-camera-video-fill"></i> Join Meeting Now
-                    </a>
-                {% endif %}
-            </div>
-        </div>
-    {% empty %}
-        <!-- Empty State -->
-        <div class="card" style="text-align: center; padding: 60px 20px;">
-            <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">📭</div>
-            <h4 style="margin-bottom: 8px; color: var(--g900);">No notifications yet</h4>
-            <p style="color: var(--g500);">When your teacher schedules a meeting or sends an alert, it will appear here.</p>
-        </div>
-    {% endfor %}
-
+<div class="page-header" style="margin-bottom: 24px;">
+  <h2 class="page-title">🔔 Notifications</h2>
+  <p class="page-subtitle">Stay updated with your latest grades, assignments, and quizzes.</p>
 </div>
+
+<div style="max-width: 800px;">
+  {% for note in notifications %}
+    <div class="card" style="padding: 20px; margin-bottom: 16px; border-left: 4px solid var(--brand-primary); background: {% if not note.is_read %}#F8FAFC{% else %}white{% endif %};">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; gap: 16px;">
+          <div style="background: var(--brand-primary-light); color: var(--brand-primary); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+            <i class="bi bi-info-circle"></i>
+          </div>
+          <div>
+            <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700; color: var(--text-main);">{{ note.title }}</h4>
+            <p style="margin: 0; font-size: 14px; color: var(--text-muted);">{{ note.message }}</p>
+            {% if note.link %}
+              <a href="{{ note.link }}" style="display: inline-block; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--brand-primary); text-decoration: none;">View Details →</a>
+            {% endif %}
+          </div>
+        </div>
+        <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">{{ note.created_at|timesince }} ago</span>
+      </div>
+    </div>
+  {% empty %}
+    <div class="card" style="text-align: center; padding: 60px 20px; border: 1px dashed var(--border-color);">
+      <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🔕</div>
+      <h4 style="color: var(--text-main); margin-bottom: 8px;">No notifications yet</h4>
+      <p style="color: var(--text-muted);">When teachers post new assignments or grade your work, it will appear here.</p>
+    </div>
+  {% endfor %}
+</div>
+
 {% endblock %}

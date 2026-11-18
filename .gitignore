@@ -1,7 +1,22 @@
-﻿venv/
+﻿# Python
 __pycache__/
-*.pyc[cod]
-.env
+*.py[cod]
+*$py.class
+
+# Django
 db.sqlite3
-media/
+db.sqlite3-journal
 staticfiles/
+media/
+
+# Environments
+.env
+venv/
+env/
+ENV/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

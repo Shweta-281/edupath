@@ -3,34 +3,134 @@
 {% block content %}
 
 <!-- ========== WELCOME HEADER ========== -->
-<div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+<div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px;">
   <div>
     <h2 style="margin-bottom: 8px; font-size: 32px; font-weight: 800; color: var(--g900);">👋 Hi, {{ user.get_full_name|default:user.username }}</h2>
-    <p style="color: var(--g500); font-size: 16px;">Here is your learning snapshot for today.</p>
+    <p style="color: var(--g500); font-size: 16px; margin: 0;">Here is your learning snapshot for today.</p>
   </div>
+  
+  <!-- Download Report Card Button -->
+  <a href="{% url 'download_report_card' %}" class="btn" style="background: #DC2626; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);">
+    <i class="bi bi-file-earmark-pdf-fill" style="font-size: 18px;"></i> Download Report Card
+  </a>
+</div>
+
+<!-- ========== GAMIFICATION XP WIDGET ========== -->
+<div class="card" style="margin-bottom: 32px; padding: 24px; border-radius: 16px; background: white; box-shadow: 0 8px 24px rgba(91, 33, 182, 0.08); border: 1px solid var(--brand-primary-light); display: flex; align-items: center; gap: 24px; flex-wrap: wrap;">
+  
+  <!-- Level Badge -->
+  <div style="position: relative;">
+    <div style="background: linear-gradient(135deg, #8B5CF6, #5B21B6); color: white; width: 80px; height: 80px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(91, 33, 182, 0.3); border: 4px solid white;">
+      <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; opacity: 0.8; margin-bottom: -2px;">Level</span>
+      <span style="font-size: 32px; font-weight: 800; line-height: 1;">{{ user.student_profile.level_info.level }}</span>
+    </div>
+    <!-- Little star icon overlapping the badge -->
+    <div style="position: absolute; bottom: -5px; right: -5px; background: #FBBF24; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white;">
+      <i class="bi bi-star-fill" style="color: white; font-size: 14px;"></i>
+    </div>
+  </div>
+
+  <!-- XP Progress -->
+  <div style="flex: 1; min-width: 250px;">
+    <!-- Explanation text -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px;">
+      <div>
+        <h4 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-main);">
+          <i class="bi bi-lightning-charge-fill" style="color: #F59E0B;"></i> {{ user.student_profile.xp_points }} XP
+        </h4>
+        <p style="margin: 0; font-size: 13px; color: var(--text-muted);">
+          Earn XP by taking quizzes and submitting assignments!
+        </p>
+      </div>
+      <div style="font-size: 13px; font-weight: 700; color: var(--brand-primary); background: var(--brand-primary-light); padding: 4px 10px; border-radius: 20px;">
+        Next level: {{ user.student_profile.level_info.xp_next }} XP
+      </div>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div style="background: #E2E8F0; height: 12px; border-radius: 10px; overflow: hidden; position: relative;">
+      <div style="background: linear-gradient(90deg, #A78BFA, #5B21B6); height: 100%; width: {{ user.student_profile.level_info.progress }}%; border-radius: 10px; transition: width 0.5s ease-in-out; display: flex; align-items: center; justify-content: flex-end; padding-right: 4px;">
+        {% if user.student_profile.level_info.progress > 5 %}
+          <i class="bi bi-rocket-fill" style="color: white; font-size: 10px;"></i>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== AI RISK PREDICTOR BANNER ========== -->
+{% if risk_status %}
+<div class="card" style="margin-bottom: 32px; border-left: 6px solid {{ risk_status.color }}; padding: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+  <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="font-size: 40px; background: {{ risk_status.bg }}; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+      {% if risk_status.label == 'High Risk' %}🚨{% elif risk_status.label == 'Medium Risk' %}⚠️{% else %}✅{% endif %}
+    </div>
+    <div>
+      <div style="font-size: 13px; font-weight: 700; color: var(--g500); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">AI Academic Status</div>
+      <h3 style="font-size: 24px; font-weight: 800; color: {{ risk_status.color }}; margin: 0 0 4px 0;">{{ risk_status.label }}</h3>
+      <p style="color: var(--g700); font-size: 15px; margin: 0;">{{ risk_status.msg }}</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ========== TOP GRID (Assignments & Chart) ========== -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; margin-bottom: 40px;">
+  
+  <!-- Upcoming Assignments -->
+  <div class="card" style="padding: 24px; border-radius: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h4 style="font-size: 18px; font-weight: 700; margin: 0;">📝 Upcoming Assignments</h4>
+      <a href="{% url 'student_assignment_list' %}" style="color: var(--p700); font-weight: 600; text-decoration: none; font-size: 14px;">View All →</a>
+    </div>
+    
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      {% for assignment in upcoming_assignments %}
+      <div style="padding: 16px; background: var(--g50); border: 1px solid var(--g100); border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h5 style="font-weight: 700; font-size: 15px; color: var(--g900); margin-bottom: 4px;">{{ assignment.title }}</h5>
+          <p style="font-size: 13px; color: var(--g500); margin: 0;">{{ assignment.course.title }}</p>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 12px; font-weight: 700; color: #DC2626; margin-bottom: 6px;">
+            <i class="bi bi-clock"></i> {{ assignment.due_date|date:"d M, h:i A" }}
+          </div>
+          <a href="{% url 'submit_assignment' assignment.pk %}" class="btn btn-primary btn-sm" style="padding: 6px 12px; border-radius: 6px; font-size: 12px;">Submit</a>
+        </div>
+      </div>
+      {% empty %}
+      <div style="text-align: center; padding: 40px 20px; background: var(--g50); border-radius: 12px; border: 1px dashed var(--g200);">
+        <div style="font-size: 32px; margin-bottom: 8px;">🎉</div>
+        <h5 style="color: var(--g900); font-weight: 600; margin-bottom: 4px;">All caught up!</h5>
+        <p style="color: var(--g500); font-size: 14px; margin: 0;">You have no pending assignments due.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Quiz Chart -->
+  <div class="card" style="padding: 24px; border-radius: 16px;">
+    <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">📈 Recent Quiz Performance</h4>
+    <div style="position: relative; height: 220px; width: 100%;">
+      <canvas id="myQuizChart"></canvas>
+    </div>
+  </div>
+
 </div>
 
 <!-- ========== STAT CARDS ========== -->
 <div class="grid-3" style="margin-bottom: 40px;">
   <div class="stat-card">
     <small>Enrolled Courses</small>
-    <h2>{{ enrollments|length }}</h2>
+    <h2>{{ enrollment_data|length }}</h2>
   </div>
   <div class="stat-card" style="border-left-color: #2563EB;">
     <small>Attendance</small>
     <h2>{{ attendance_percent }}%</h2>
   </div>
   <div class="stat-card" style="border-left-color: #F59E0B;">
-    <small>Recent Quizzes</small>
+    <small>Quizzes Taken</small>
     <h2>{{ attempts|length }}</h2>
-  </div>
-</div>
-
-<!-- ========== QUIZ CHART ========== -->
-<div class="card" style="padding: 24px; margin-bottom: 48px; border-radius: 16px;">
-  <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 20px;">📈 Your Quiz Performance</h4>
-  <div style="position: relative; height: 250px; width: 100%;">
-    <canvas id="myQuizChart"></canvas>
   </div>
 </div>
 
@@ -38,39 +138,55 @@
 <h3 id="my-learning" style="margin-bottom: 24px; font-size: 24px; font-weight: 800; color: #0F172A;">📚 My Learning</h3>
 
 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; margin-bottom: 48px;">
-  {% for e in enrollments %}
+  {% for item in enrollment_data %}
     <div class="card" style="padding: 0; overflow: hidden; border: 1px solid var(--g100); border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; transition: 0.2s;" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
       
       <!-- Card Banner -->
       <div style="height: 110px; position: relative; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #5B21B6, #7C3AED); overflow: hidden;">
-        <i class="bi {{ e.course.subject.icon|default:'bi-journal-bookmark-fill' }}" style="font-size: 44px; color: rgba(255,255,255,0.8); position: absolute;"></i>
-        {% if e.course.thumbnail %}
-          <img src="{{ e.course.thumbnail.url }}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1;" onerror="this.style.display='none';">
+        <i class="bi {{ item.enrollment.course.subject.icon|default:'bi-journal-bookmark-fill' }}" style="font-size: 44px; color: rgba(255,255,255,0.8); position: absolute;"></i>
+        {% if item.enrollment.course.thumbnail %}
+          <img src="{{ item.enrollment.course.thumbnail.url }}" style="width: 100%; height: 100%; object-fit: cover; position: absolute; z-index: 1;" onerror="this.style.display='none';">
         {% endif %}
       </div>
       
       <!-- Card Content -->
       <div style="padding: 24px; flex: 1; display: flex; flex-direction: column;">
         <div style="margin-bottom: 12px; display: flex; gap: 8px;">
-          <span class="badge badge-outline">Class {{ e.course.subject.grade }}</span>
-          <span class="badge badge-outline">{{ e.course.subject.name }}</span>
+          <span class="badge badge-outline">Class {{ item.enrollment.course.subject.grade }}</span>
+          <span class="badge badge-outline">{{ item.enrollment.course.subject.name }}</span>
+          <span class="badge badge-outline" style="background: #FEF3C7; color: #D97706; border-color: #FDE68A;">
+            {{ item.enrollment.course.subject.board }}
+          </span>
         </div>
         
-        <h4 style="font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 16px; line-height: 1.3;">{{ e.course.title }}</h4>
+        <h4 style="font-size: 18px; font-weight: 700; color: var(--g900); margin-bottom: 16px; line-height: 1.3;">{{ item.enrollment.course.title }}</h4>
         
-        <!-- Simulated Progress Bar (Makes it look professional) -->
+        <!-- Dynamic Progress Bar -->
         <div style="margin-top: auto;">
           <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--g500); margin-bottom: 6px;">
             <span>Course Progress</span>
-            <span>In Progress</span>
+            <span>{{ item.progress.percentage }}%</span>
           </div>
           <div style="background: var(--g100); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 20px;">
-            <div style="background: var(--p700); height: 100%; width: 35%; border-radius: 3px;"></div>
+            <div style="background: {% if item.progress.percentage == 100 %}#16A34A{% else %}var(--p700){% endif %}; height: 100%; width: {{ item.progress.percentage }}%; border-radius: 3px; transition: width 0.5s ease;"></div>
           </div>
           
-          <a href="{% url 'course_detail' e.course.pk %}" class="btn btn-primary btn-block" style="padding: 12px; font-weight: 700; border-radius: 8px;">
-            Continue Learning <i class="bi bi-arrow-right"></i>
-          </a>
+          <div style="display: flex; gap: 8px;">
+            <a href="{% url 'course_detail' item.enrollment.course.pk %}" class="btn btn-primary" style="flex: 1; padding: 12px; font-weight: 700; border-radius: 8px; text-align: center;">
+              Continue <i class="bi bi-arrow-right"></i>
+            </a>
+            
+            <!-- Locked/Unlocked Certificate Button -->
+            {% if item.progress.is_completed %}
+              <a href="{% url 'download_certificate' item.enrollment.course.pk %}" class="btn" style="background: #F59E0B; color: white; padding: 12px 16px; border-radius: 8px; text-decoration: none; font-weight: 700; text-align: center; display: flex; align-items: center; justify-content: center;" title="Download Certificate">
+                <i class="bi bi-award-fill me-1"></i> Certificate
+              </a>
+            {% else %}
+              <button class="btn" style="background: #E2E8F0; color: #94A3B8; padding: 12px 16px; border-radius: 8px; font-weight: 700; text-align: center; border: none; cursor: not-allowed; display: flex; align-items: center; justify-content: center;" title="Complete all quizzes and assignments to unlock">
+                <i class="bi bi-lock-fill me-1"></i> Locked
+              </button>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
