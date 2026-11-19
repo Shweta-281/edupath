@@ -19,6 +19,8 @@ class CustomLoginView(LoginView):
 
     def get_success_url(self):
         return "/dashboard/"
+    
+
 
 
 def register_view(request):
@@ -30,7 +32,11 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, f"Welcome to EduPath! You are registered under the {user.student_profile.board if user.role == 'student' else 'EduPath'} board.")
+            
+            # SAFE CHECK: Prevents crash if profile isn't ready or if it's not a student
+            board_name = user.student_profile.board if hasattr(user, 'student_profile') else 'EduPath'
+            
+            messages.success(request, f"Welcome to EduPath! You are registered under the {board_name} board.")
             return redirect("/dashboard/")
         else:
             messages.error(request, "Registration failed. Please check the errors below.")
@@ -42,6 +48,7 @@ def register_view(request):
 
 def logout_view(request):
     logout(request)
+    messages.info(request, "You have been logged out.")
     return redirect("home")
 
 

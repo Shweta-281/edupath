@@ -38,6 +38,7 @@ from django.shortcuts import redirect
 from .utils import generate_combined_report_card, generate_report_card
 from assessments.models import QuizAttempt
 from attendance.models import Attendance
+from django.contrib import messages
 
 from .utils import (
     generate_report_card,
@@ -53,10 +54,31 @@ def home(request):
 
 @login_required
 def dashboard(request):
+    # 1. Superusers always go to the admin dashboard
+    if request.user.is_superuser:
+        return admin_dashboard(request)
+        
     role = request.user.role
-    if role == "student": return student_dashboard(request)
-    if role == "teacher": return teacher_dashboard(request)
-    if role == "parent": return parent_dashboard(request)
+    
+    # 2. Safely route based on role, checking if the profile actually exists
+    if role == "student": 
+        if not hasattr(request.user, 'student_profile'):
+            messages.error(request, "Your student profile is missing. Please contact support.")
+            return redirect('home')
+        return student_dashboard(request)
+        
+    if role == "teacher": 
+        if not hasattr(request.user, 'teacher_profile'):
+            messages.error(request, "Your teacher profile is missing. Please contact support.")
+            return redirect('home')
+        return teacher_dashboard(request)
+        
+    if role == "parent": 
+        if not hasattr(request.user, 'parent_profile'):
+            messages.error(request, "Your parent profile is missing. Please contact support.")
+            return redirect('home')
+        return parent_dashboard(request)
+        
     return admin_dashboard(request) 
 
 def student_dashboard(request):

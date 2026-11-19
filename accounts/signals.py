@@ -1,7 +1,7 @@
 # accounts/signals.py
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from .models import AuditLog
+from .models import AuditLog, User, StudentProfile, TeacherProfile, ParentProfile
 
 # 🔥 FIX: These must come from assessments.models and courses.models, NOT .models!
 from assessments.models import Assignment, Quiz, Submission
@@ -75,3 +75,25 @@ def notify_student_graded(sender, instance, created, **kwargs):
             message=f"Your submission for '{instance.assignment.title}' has been graded. You scored: {instance.grade}",
             link="/quiz/assignments/student/"
         )
+
+# ==========================================
+# 3. USER PROFILE CREATION SIGNALS (THE FIX)
+# ==========================================
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        if instance.role == 'student':
+            StudentProfile.objects.get_or_create(user=instance)
+        elif instance.role == 'teacher':
+            TeacherProfile.objects.get_or_create(user=instance)
+        elif instance.role == 'parent':
+            ParentProfile.objects.get_or_create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    if instance.role == 'student' and hasattr(instance, 'student_profile'):
+        instance.student_profile.save()
+    elif instance.role == 'teacher' and hasattr(instance, 'teacher_profile'):
+        instance.teacher_profile.save()
+    elif instance.role == 'parent' and hasattr(instance, 'parent_profile'):
+        instance.parent_profile.save()
